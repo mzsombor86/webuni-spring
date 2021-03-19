@@ -1,6 +1,8 @@
 package hu.webuni.hr.mzsombor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -22,13 +24,24 @@ public class HrApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		Employee employee1 = new Employee(1, "Sam Mendes", "CTO", 100_000, LocalDateTime.parse("2021-03-01T10:00:00"));
+		List<Employee> employees = new ArrayList<>();
+		employees.add(new Employee(1, "Sam Mendes", "CEO", 1_000_000, LocalDateTime.parse("1980-03-01T10:00:00")));
+		employees.add(new Employee(2, "John Smith", "CTO", 500_000, LocalDateTime.parse("1990-03-01T10:00:00")));
+		employees.add(new Employee(3, "Angela Davidson", "CXO", 500_000, LocalDateTime.parse("2000-03-01T10:00:00")));
+		employees.add(new Employee(4, "Peter Knee", "developer", 300_000, LocalDateTime.parse("2010-03-01T10:00:00")));
+		employees.add(new Employee(5, "Anthony Spacy", "adminstrative", 200_000, LocalDateTime.parse("2015-03-01T10:00:00")));
+		employees.add(new Employee(5, "Richard Pearce", "associate", 200_000, LocalDateTime.parse("2018-09-01T10:00:00")));
+		employees.add(new Employee(5, "Megan Baker", "trainee", 100_000, LocalDateTime.parse("2020-09-01T10:00:00")));
 
-		System.out.println(employee1.getName() + " fizetése az emelés előtt: " + employee1.getSalary());
-
-		salaryService.setRaise(employee1);
-
-		System.out.println(employee1.getName() + " fizetése az emelés után: " + employee1.getSalary());
+		for (int i = 0; i < employees.size(); i++) {
+			System.out.println(employees.get(i));
+			System.out
+					.println(employees.get(i).getName() + "'s salary before the raise: " + employees.get(i).getSalary());
+			salaryService.setRaise(employees.get(i));
+			System.out
+					.println(employees.get(i).getName() + "'s salary after the raise: " + employees.get(i).getSalary());
+			System.out.println("");
+		}
 
 	}
 

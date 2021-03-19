@@ -57,4 +57,12 @@ public class Employee {
 		this.entryDate = entryDate;
 	}
 
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", name=" + name + ", title=" + title + ", salary=" + salary + ", entryDate="
+				+ entryDate + "]";
+	}
+	
+	
+
 }

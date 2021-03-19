@@ -3,8 +3,8 @@ hr:
     def:
       percent: 5
     smart:
-      years: 30, 20, 10, 5, 2.5
-      percents: 30, 20, 10, 5, 2
+      years:    40, 30, 20, 10, 5, 2.5
+      percents: 40, 30, 20, 10, 5, 2
 spring:
   profiles:
     active: smart
