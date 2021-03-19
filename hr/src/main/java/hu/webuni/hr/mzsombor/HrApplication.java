@@ -33,13 +33,11 @@ public class HrApplication implements CommandLineRunner {
 		employees.add(new Employee(5, "Richard Pearce", "associate", 200_000, LocalDateTime.parse("2018-09-01T10:00:00")));
 		employees.add(new Employee(5, "Megan Baker", "trainee", 100_000, LocalDateTime.parse("2020-09-01T10:00:00")));
 
-		for (int i = 0; i < employees.size(); i++) {
-			System.out.println(employees.get(i));
-			System.out
-					.println(employees.get(i).getName() + "'s salary before the raise: " + employees.get(i).getSalary());
-			salaryService.setRaise(employees.get(i));
-			System.out
-					.println(employees.get(i).getName() + "'s salary after the raise: " + employees.get(i).getSalary());
+		for (Employee employee : employees) {
+			System.out.println(employee);
+			System.out.println(employee.getName() + "'s salary before the raise: " + employee.getSalary());
+			salaryService.setRaise(employee);
+			System.out.println(employee.getName() + "'s salary after the raise: " + employee.getSalary());
 			System.out.println("");
 		}
 
