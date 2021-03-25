@@ -8,3 +8,10 @@ hr:
 spring:
   profiles:
     active: smart
+  thymeleaf:  
+    cache: false 
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      time: HH:mm:ss
+      date-time: yyyy-MM-dd HH:mm:ss

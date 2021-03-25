@@ -11,7 +11,7 @@ import hu.webuni.airport.service.PriceService;
 public class AirportApplication implements CommandLineRunner {
 
 	@Autowired
-	PriceService priceService;
+	//PriceService priceService;
 	
 	public static void main(String[] args) {
 		SpringApplication.run(AirportApplication.class, args);
@@ -19,8 +19,8 @@ public class AirportApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		System.out.println(priceService.getFinalPrice(200));
-		System.out.println(priceService.getFinalPrice(20_000));
+		//System.out.println(priceService.getFinalPrice(200));
+		//System.out.println(priceService.getFinalPrice(20_000));
 	
 		
 	}
