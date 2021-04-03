@@ -16,23 +16,30 @@
 		<th>Title
 		<th>Salary
 		<th>Entry date
+		<th>Delete employee
 	<tbody>
 		<tr th:each="employee : ${employees}">
 			<td th:text="${employee.id}">Id
-			<td th:text="${employee.name}">Name
+			<td><a th:text="${employee.name}" th:href="@{/editemployee/{id}(id=${employee.id})}">Name</a>
 			<td th:text="${employee.title}">Title
 			<td th:text="${employee.salary}">Salary
 			<td th:text="${employee.entryDate}">EntryDate
+			<td><a th:href="@{/deleteemployee/{id}(id=${employee.id})}">Delete</a>
 	</table>
-	<br><br>
+	
+	<h2>Add a new employee:</h2>
 	
 	<form th:action="@{/employees}" method="post" th:object="${newEmployee}">
-		Id: <input th:field="*{id}" /><br>
-		Name: <input th:field="*{name}" /><br>
-		Title: <input th:field="*{title}" /><br>
-		Salary: <input th:field="*{salary}" /><br>
-		Entry date: <input th:field="*{entryDate}" /><br>
-		<input type="submit" value="Add" />
+		<table border>
+			<tbody>
+				<tr><td>Id: <td><input th:field="*{id}" />
+				<tr><td>Name: <td><input th:field="*{name}" />
+				<tr><td>Title: <td><input th:field="*{title}" />
+				<tr><td>Salary: <td><input th:field="*{salary}" />
+				<tr><td>Entry date: <td><input th:field="*{entryDate}" />
+				<tr><td><input type="submit" value="Add" />
+			</tbody>
+		</table>
 	</form>
 
 </body>

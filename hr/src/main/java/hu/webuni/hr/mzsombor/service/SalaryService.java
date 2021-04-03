@@ -2,6 +2,7 @@ package hu.webuni.hr.mzsombor.service;
 
 import org.springframework.stereotype.Service;
 
+import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 import hu.webuni.hr.mzsombor.model.Employee;
 
 @Service
@@ -13,8 +14,12 @@ public class SalaryService {
 		this.employeeService = employeeService;
 	}
 
-	public void setRaise(Employee employee) {
+	public void setRaise(EmployeeDto employee) {
 		employee.setSalary((int) (employee.getSalary() * (100 + employeeService.getPayRaisePercent(employee)) * 0.01));
+	}
+	
+	public int getRaisePercentage(EmployeeDto employee) {
+		return employeeService.getPayRaisePercent(employee);
 	}
 
 }

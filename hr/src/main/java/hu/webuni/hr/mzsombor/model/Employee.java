@@ -8,7 +8,6 @@ public class Employee {
 	private String title;
 	private int salary;
 	private LocalDateTime entryDate;
-//	private String entryDateString;
 	
 	public Employee() {
 		
@@ -21,7 +20,6 @@ public class Employee {
 		this.title = title;
 		this.salary = salary;
 		this.entryDate = entryDate;
-//		entryDateString = entryDate.toString();
 	}
 
 
@@ -63,19 +61,7 @@ public class Employee {
 
 	public void setEntryDate(LocalDateTime entryDate) {
 		this.entryDate = entryDate;	
-//		this.entryDateString = entryDate.toString();
-	}	
-	
-
-//	public String getEntryDateString() {
-//		return entryDateString;
-//	}
-//
-//
-//	public void setEntryDateString(String entryDateString) {
-//		this.entryDateString = entryDateString;
-//		entryDate = LocalDateTime.parse(entryDateString);
-//	}
+	}
 
 
 	@Override

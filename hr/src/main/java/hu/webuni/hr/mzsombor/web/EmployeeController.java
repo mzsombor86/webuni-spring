@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,15 +16,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hu.webuni.hr.mzsombor.dto.EmployeeDto;
+import hu.webuni.hr.mzsombor.service.SalaryService;
 
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
+
+	@Autowired
+	SalaryService salaryService;
 
 	private Map<Long, EmployeeDto> employees = new HashMap<>();
 	{
@@ -42,11 +46,13 @@ public class EmployeeController {
 				new EmployeeDto(7, "Megan Baker", "trainee", 100_000, LocalDateTime.parse("2020-09-01T10:00:00")));
 	}
 
+	// Az összes alkalmazott kilistázása
 	@GetMapping
 	public List<EmployeeDto> getAll() {
 		return new ArrayList<>(employees.values());
 	}
 
+	// Egy alkalmazott kilistázása az ID-ja alapján
 	@GetMapping("/{id}")
 	public ResponseEntity<EmployeeDto> getById(@PathVariable long id) {
 		EmployeeDto employeeDto = employees.get(id);
@@ -56,12 +62,14 @@ public class EmployeeController {
 			return ResponseEntity.notFound().build();
 	}
 
+	// Egy új alkalmazott hozzáadása
 	@PostMapping
-	public EmployeeDto createEmployee(@RequestBody EmployeeDto airportDto) {
-		employees.put(airportDto.getId(), airportDto);
-		return airportDto;
+	public EmployeeDto createEmployee(@RequestBody EmployeeDto employee) {
+		employees.put(employee.getId(), employee);
+		return employee;
 	}
 
+	// Létező alkalmazott módosítása
 	@PutMapping("/{id}")
 	public ResponseEntity<EmployeeDto> modifyEmployee(@PathVariable long id, @RequestBody EmployeeDto employeeDto) {
 		if (!employees.containsKey(id))
@@ -72,14 +80,22 @@ public class EmployeeController {
 		return ResponseEntity.ok(employeeDto);
 	}
 
+	// Alkamlmazott törlése
 	@DeleteMapping("/{id}")
 	public void deleteEmployee(@PathVariable long id) {
 		employees.remove(id);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, params = "aboveSalary")
-	public List<EmployeeDto> getAboveASalary(@RequestParam(name = "aboveSalary") int salary) {
-		return new ArrayList<>(
-				employees.values().stream().filter(e -> e.getSalary() > salary).collect(Collectors.toList()));
+	// Bizonyos fizetés fölötti alkalmazottak kilistázása
+	@GetMapping(params = "aboveSalary")
+	public List<EmployeeDto> getAboveASalary(@RequestParam int aboveSalary) {
+		return employees.values().stream().filter(e -> e.getSalary() > aboveSalary).collect(Collectors.toList());
 	}
+
+	// Beküldött alkalmazott fizetésemelésének mértékének meghatározása.
+	@PostMapping("/getraisepercentage")
+	public int getSalaryRaisePrecentage(@RequestBody EmployeeDto employee) {
+		return salaryService.getRaisePercentage(employee);
+	}
+
 }

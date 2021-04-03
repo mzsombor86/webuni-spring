@@ -1,9 +1,9 @@
 package hu.webuni.hr.mzsombor.service;
 
-import hu.webuni.hr.mzsombor.model.Employee;
+import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 
 public interface EmployeeService {
 
-	public int getPayRaisePercent(Employee employee);
+	public int getPayRaisePercent(EmployeeDto employee);
 
 }
