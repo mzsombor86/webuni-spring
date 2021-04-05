@@ -103,7 +103,7 @@ public class CompanyContorller {
 	}
 
 	// Alkalmazott hozzáadása egy céghez
-	@PostMapping("/{registrationNumber}/addemployee")
+	@PostMapping("/{registrationNumber}/employee")
 	public CompanyDto addEmployeeToACompany(@PathVariable long registrationNumber,
 			@RequestBody EmployeeDto employeeDto) {
 		companies.get(registrationNumber).addEmployee(employeeDto);
@@ -111,7 +111,7 @@ public class CompanyContorller {
 	}
 
 	// Egy cég alkalmazottainak módosítása
-	@PutMapping("/{registrationNumber}/modifyemployees")
+	@PutMapping("/{registrationNumber}/employee")
 	public ResponseEntity<CompanyDto> modifyEmployeesOfACompany(@PathVariable long registrationNumber,
 			@RequestBody List<EmployeeDto> employees) {
 		if (!companies.containsKey(registrationNumber))
@@ -121,7 +121,7 @@ public class CompanyContorller {
 	}
 
 	// Egy cég egy bizonyos alkalmazottjának törlése
-	@DeleteMapping("/{registrationNumber}/deleteemployee/{id}")
+	@DeleteMapping("/{registrationNumber}/employee/{id}")
 	public void deleteEmployeeFromACompany(@PathVariable long registrationNumber, @PathVariable long id) {
 		companies.get(registrationNumber).deleteEmployee(id);
 	}
