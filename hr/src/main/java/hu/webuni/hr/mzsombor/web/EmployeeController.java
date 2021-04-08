@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,14 +22,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hu.webuni.hr.mzsombor.dto.EmployeeDto;
-import hu.webuni.hr.mzsombor.service.SalaryService;
+import hu.webuni.hr.mzsombor.model.Employee;
+import hu.webuni.hr.mzsombor.service.EmployeeService;
 
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
 
 	@Autowired
-	SalaryService salaryService;
+	EmployeeService employeeService;
 
 	private Map<Long, EmployeeDto> employees = new HashMap<>();
 	{
@@ -64,14 +67,14 @@ public class EmployeeController {
 
 	// Egy új alkalmazott hozzáadása
 	@PostMapping
-	public EmployeeDto createEmployee(@RequestBody EmployeeDto employee) {
+	public EmployeeDto createEmployee(@RequestBody @Valid EmployeeDto employee) {
 		employees.put(employee.getId(), employee);
 		return employee;
 	}
 
 	// Létező alkalmazott módosítása
 	@PutMapping("/{id}")
-	public ResponseEntity<EmployeeDto> modifyEmployee(@PathVariable long id, @RequestBody EmployeeDto employeeDto) {
+	public ResponseEntity<EmployeeDto> modifyEmployee(@PathVariable long id, @RequestBody @Valid EmployeeDto employeeDto) {
 		if (!employees.containsKey(id))
 			return ResponseEntity.notFound().build();
 
@@ -94,8 +97,8 @@ public class EmployeeController {
 
 	// Beküldött alkalmazott fizetésemelésének mértékének meghatározása.
 	@PostMapping("/getraisepercentage")
-	public int getSalaryRaisePrecentage(@RequestBody EmployeeDto employee) {
-		return salaryService.getRaisePercentage(employee);
+	public int getSalaryRaisePrecentage(@RequestBody Employee employee) {
+		return employeeService.getPayRaisePercent(employee);
 	}
 
 }

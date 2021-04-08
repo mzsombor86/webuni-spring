@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import hu.webuni.airport.AirportDto;
+import hu.webuni.airport.dto.AirportDto;
 
 @Controller
 public class AirportTLController {

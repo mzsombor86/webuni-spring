@@ -1,0 +1,40 @@
+package hu.webuni.airport.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import hu.webuni.airport.model.Airport;
+
+@Service
+public class AirportService {
+
+	private Map<Long, Airport> airports = new HashMap<>();
+
+	{
+		airports.put(1L, new Airport(1, "abc", "XYZ"));
+		airports.put(2L, new Airport(2, "def", "UVW"));
+		airports.put(3L, new Airport(3, "ghi", "RST"));
+
+	}
+	
+	public Airport save(Airport airport) {
+		airports.put(airport.getId(), airport);
+		return airport;
+	}
+	
+	public List<Airport> findAll() {
+		return new ArrayList<Airport>(airports.values());
+	}
+	
+	public Airport findById(long id) {
+		return airports.get(id);
+	}
+	
+	public void delete(long id) {
+		airports.remove(id);
+	}
+}

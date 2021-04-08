@@ -58,7 +58,7 @@ public class EmployeeTLController {
 	@PostMapping("/employees")
 	public String addEmployee(EmployeeDto employee) {
 		allEmployees.put(employee.getId(),employee);
-		return "redirect:employees";
+		return "redirect:/employees";
 	}
 	
 	// Alkalmazott módosítása

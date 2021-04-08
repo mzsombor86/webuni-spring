@@ -106,7 +106,7 @@ public class CompanyContorller {
 	@PostMapping("/{registrationNumber}/employee")
 	public CompanyDto addEmployeeToACompany(@PathVariable long registrationNumber,
 			@RequestBody EmployeeDto employeeDto) {
-		companies.get(registrationNumber).addEmployee(employeeDto);
+		companies.get(registrationNumber).getEmployees().add(employeeDto);
 		return companies.get(registrationNumber);
 	}
 
@@ -123,7 +123,7 @@ public class CompanyContorller {
 	// Egy cég egy bizonyos alkalmazottjának törlése
 	@DeleteMapping("/{registrationNumber}/employee/{id}")
 	public void deleteEmployeeFromACompany(@PathVariable long registrationNumber, @PathVariable long id) {
-		companies.get(registrationNumber).deleteEmployee(id);
+		companies.get(registrationNumber).getEmployees().removeIf(e -> e.getId() == id);
 	}
 
 }

@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import hu.webuni.hr.mzsombor.config.HrConfigProperties;
-import hu.webuni.hr.mzsombor.dto.EmployeeDto;
+import hu.webuni.hr.mzsombor.model.Employee;
 
 @Service
 public class SmartEmployeeService implements EmployeeService {
@@ -20,7 +20,7 @@ public class SmartEmployeeService implements EmployeeService {
 	HrConfigProperties config;
 
 	@Override
-	public int getPayRaisePercent(EmployeeDto employee) {
+	public int getPayRaisePercent(Employee employee) {
 		double yearsFromEntry = Duration.between(employee.getEntryDate(), LocalDateTime.now()).toDays() / 365.0;
 
 		String yearsString = config.getRaise().getSmart().getYears();

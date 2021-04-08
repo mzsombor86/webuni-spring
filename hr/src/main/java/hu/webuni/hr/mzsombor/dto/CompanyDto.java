@@ -47,18 +47,6 @@ public class CompanyDto {
 	public void setEmployees(List<EmployeeDto> employees) {
 		this.employees = employees;
 	}
-	
-	public EmployeeDto getEmployee(long id) {
-		return employees.stream().filter(e -> e.getId() == id).collect(Collectors.toList()).get(0);
-	}
-	
-	public void addEmployee(EmployeeDto employee) {
-		employees.add(employee);
-	}
-	
-	public void deleteEmployee(long id) {
-		employees.removeIf(e -> e.getId() == id);
-	}
-	
+		
 
 }

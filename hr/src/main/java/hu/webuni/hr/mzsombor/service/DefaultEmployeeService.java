@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import hu.webuni.hr.mzsombor.config.HrConfigProperties;
-import hu.webuni.hr.mzsombor.dto.EmployeeDto;
+import hu.webuni.hr.mzsombor.model.Employee;
 
 @Service
 public class DefaultEmployeeService implements EmployeeService {
@@ -13,7 +13,7 @@ public class DefaultEmployeeService implements EmployeeService {
 	HrConfigProperties config;
 
 	@Override
-	public int getPayRaisePercent(EmployeeDto employee) {
+	public int getPayRaisePercent(Employee employee) {
 		return config.getRaise().getDef().getPercent();
 	}
 
