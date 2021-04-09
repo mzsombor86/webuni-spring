@@ -11,5 +11,9 @@ import hu.webuni.airport.model.Airport;
 public interface AirportMapper {
 
 	List<AirportDto> airportsToDtos(List<Airport> airports);
+
+	AirportDto airportToDto(Airport airport);
+
+	Airport dtoToAirport(AirportDto airportDto);
 	
 }

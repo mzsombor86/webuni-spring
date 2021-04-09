@@ -14,7 +14,7 @@ import hu.webuni.hr.mzsombor.config.HrConfigProperties;
 import hu.webuni.hr.mzsombor.model.Employee;
 
 @Service
-public class SmartEmployeeService implements EmployeeService {
+public class SmartEmployeeService extends EmployeeService {
 
 	@Autowired
 	HrConfigProperties config;

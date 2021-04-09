@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class AirportService {
 	}
 	
 	public Airport save(Airport airport) {
+		checkUniqueIata(airport.getIata());
 		airports.put(airport.getId(), airport);
 		return airport;
 	}
@@ -37,4 +39,13 @@ public class AirportService {
 	public void delete(long id) {
 		airports.remove(id);
 	}
+	
+	private void checkUniqueIata(String iata) {
+		Optional<Airport> airportWithSameIata = airports.values().stream()
+				.filter(a -> a.getIata().equals(iata))
+				.findAny();
+		if (airportWithSameIata.isPresent())
+			throw new NonUniqueIataException(iata);
+	}
+	
 }

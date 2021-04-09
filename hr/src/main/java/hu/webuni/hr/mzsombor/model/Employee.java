@@ -2,18 +2,25 @@ package hu.webuni.hr.mzsombor.model;
 
 import java.time.LocalDateTime;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Past;
+
 public class Employee {
 	private long id;
+	@NotEmpty
 	private String name;
+	@NotEmpty
 	private String title;
+	@Min(value = 1)
 	private int salary;
+	@Past
 	private LocalDateTime entryDate;
-	
+
 	public Employee() {
-		
+
 	}
-	
-	
+
 	public Employee(long id, String name, String title, int salary, LocalDateTime entryDate) {
 		this.id = id;
 		this.name = name;
@@ -21,7 +28,6 @@ public class Employee {
 		this.salary = salary;
 		this.entryDate = entryDate;
 	}
-
 
 	public long getId() {
 		return id;
@@ -60,16 +66,13 @@ public class Employee {
 	}
 
 	public void setEntryDate(LocalDateTime entryDate) {
-		this.entryDate = entryDate;	
+		this.entryDate = entryDate;
 	}
-
 
 	@Override
 	public String toString() {
 		return "Employee [id=" + id + ", name=" + name + ", title=" + title + ", salary=" + salary + ", entryDate="
 				+ entryDate + "]";
 	}
-	
-	
 
 }
