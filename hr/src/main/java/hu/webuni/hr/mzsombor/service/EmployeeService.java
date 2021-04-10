@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import hu.webuni.hr.mzsombor.model.Employee;
 
@@ -37,6 +38,10 @@ public abstract class EmployeeService {
 	
 	public Employee findById(long id) {
 		return employees.get(id);
+	}
+	
+	public List<Employee> findAboveASalary(int aboveSalary) {
+		return employees.values().stream().filter(e -> e.getSalary() > aboveSalary).collect(Collectors.toList());
 	}
 	
 	public Employee save(Employee employee) {

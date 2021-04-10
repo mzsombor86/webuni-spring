@@ -43,10 +43,14 @@ public class CompanyContorller {
 	public List<CompanyDto> getAllCompanies(@RequestParam(required = false) String full) {
 		if (full == null || full.equals("false")) {
 			return companyService.findAll().stream()
-					.map(c -> new CompanyDto(c.getRegistrationNumber(), c.getName(), c.getAddress(), null))
+					.map(c -> companyMapper.companyToDto(c))
+					.map(c -> {
+						c.setEmployees(null);
+						return c;
+						})
 					.collect(Collectors.toList());
 		} else
-			return companyMapper.companiesToDtos(companyService.findAll().stream().collect(Collectors.toList()));
+			return companyMapper.companiesToDtos(companyService.findAll());
 	}
 
 	// Egy bizonyos cég kilistázása, full paraméter megléte esetén az alkalmazottak
@@ -56,12 +60,10 @@ public class CompanyContorller {
 			@RequestParam(required = false) String full) {
 		Company company = companyService.findById(id);
 		if (company != null) {
-			if (full == null || full.equals("false")) {
-				return ResponseEntity.ok(
-						new CompanyDto(company.getRegistrationNumber(), company.getName(), company.getAddress(), null));
-			} else {
-				return ResponseEntity.ok(companyMapper.companyToDto(company));
-			}
+			CompanyDto companyDto = companyMapper.companyToDto(company);
+			if (full == null || full.equals("false"))
+				companyDto.setEmployees(null);	
+			return ResponseEntity.ok(companyDto);
 		} else {
 			return ResponseEntity.notFound().build();
 		}

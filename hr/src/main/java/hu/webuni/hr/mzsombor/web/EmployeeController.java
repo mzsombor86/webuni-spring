@@ -76,7 +76,7 @@ public class EmployeeController {
 	// Bizonyos fizetés fölötti alkalmazottak kilistázása
 	@GetMapping(params = "aboveSalary")
 	public List<EmployeeDto> getAboveASalary(@RequestParam int aboveSalary) {
-		return employeeMapper.employeesToDtos(employeeService.findAll().stream().filter(e -> e.getSalary() > aboveSalary).collect(Collectors.toList()));
+		return employeeMapper.employeesToDtos(employeeService.findAboveASalary(aboveSalary));
 	}
 
 	// Beküldött alkalmazott fizetésemelésének mértékének meghatározása.

@@ -42,7 +42,7 @@ public class EmployeeControllerIT {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
 		EmployeeDto newEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 0,
 				LocalDateTime.parse("2020-09-01T10:00:00"));
-		createEmployee(newEmployee);
+		createInvalidEmployee(newEmployee);
 
 		List<EmployeeDto> employeesAfter = getAllEmployees();
 
@@ -72,7 +72,8 @@ public class EmployeeControllerIT {
 		
 		EmployeeDto modifiedEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 0,
 				LocalDateTime.parse("2020-09-01T10:00:00"));
-		modifyEmployee(modifiedEmployee);
+		
+		modifyInvalidEmployee(modifiedEmployee);
 
 		EmployeeDto employeeAfterModification = getEmployee(modifiedEmployee.getId());
 
@@ -88,7 +89,19 @@ public class EmployeeControllerIT {
 			.post()
 			.uri(BASE_URI)
 			.bodyValue(newEmployee)
-			.exchange();
+			.exchange()
+			.expectStatus()
+			.isOk();
+	}
+	
+	private void createInvalidEmployee(EmployeeDto newEmployee) {
+		webTestClient
+			.post()
+			.uri(BASE_URI)
+			.bodyValue(newEmployee)
+			.exchange()
+			.expectStatus()
+			.isBadRequest();
 	}
 
 	private void modifyEmployee(EmployeeDto newEmployee) {
@@ -96,7 +109,20 @@ public class EmployeeControllerIT {
 			.put()
 			.uri(BASE_URI + "/" + newEmployee.getId())
 			.bodyValue(newEmployee)
-			.exchange();
+			.exchange()
+			.expectStatus()
+			.isOk();
+	}
+	
+	private void modifyInvalidEmployee(EmployeeDto newEmployee) {
+		webTestClient
+			.put()
+			.uri(BASE_URI + "/" + newEmployee.getId())
+			.bodyValue(newEmployee)
+			.exchange()
+			.expectStatus()
+			.isBadRequest();
+			
 	}
 
 	private List<EmployeeDto> getAllEmployees() {
