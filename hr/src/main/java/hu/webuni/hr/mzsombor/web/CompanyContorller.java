@@ -41,16 +41,18 @@ public class CompanyContorller {
 	// adataival együtt.
 	@GetMapping
 	public List<CompanyDto> getAllCompanies(@RequestParam(required = false) String full) {
+		List<Company> allCompanies = companyService.findAll();
 		if (full == null || full.equals("false")) {
-			return companyService.findAll().stream()
-					.map(c -> companyMapper.companyToDto(c))
-					.map(c -> {
-						c.setEmployees(null);
-						return c;
-						})
-					.collect(Collectors.toList());
+			return companyMapper.companiesToSummaryDtos(allCompanies);
+//			return companyService.findAll().stream()
+//					.map(c -> companyMapper.companyToDto(c))
+//					.map(c -> {
+//						c.setEmployees(null);
+//						return c;
+//						})
+//					.collect(Collectors.toList());
 		} else
-			return companyMapper.companiesToDtos(companyService.findAll());
+			return companyMapper.companiesToDtos(allCompanies);
 	}
 
 	// Egy bizonyos cég kilistázása, full paraméter megléte esetén az alkalmazottak
@@ -60,9 +62,11 @@ public class CompanyContorller {
 			@RequestParam(required = false) String full) {
 		Company company = companyService.findById(id);
 		if (company != null) {
-			CompanyDto companyDto = companyMapper.companyToDto(company);
+			CompanyDto companyDto = null;
 			if (full == null || full.equals("false"))
-				companyDto.setEmployees(null);	
+				companyDto = companyMapper.companyToSummaryDto(company);
+			else
+				companyDto = companyMapper.companyToDto(company);
 			return ResponseEntity.ok(companyDto);
 		} else {
 			return ResponseEntity.notFound().build();
