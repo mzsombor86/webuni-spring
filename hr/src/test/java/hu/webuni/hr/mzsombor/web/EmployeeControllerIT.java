@@ -55,7 +55,7 @@ public class EmployeeControllerIT {
 		EmployeeDto originalEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 500_000,
 				LocalDateTime.parse("2020-09-01T10:00:00"));
 		createEmployee(originalEmployee);
-		
+
 		EmployeeDto modifiedEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 600_000,
 				LocalDateTime.parse("2020-09-01T10:00:00"));
 		modifyEmployee(modifiedEmployee);
@@ -64,24 +64,23 @@ public class EmployeeControllerIT {
 
 		assertThat(employeeAfterModification).usingRecursiveComparison().isEqualTo(modifiedEmployee);
 	}
-	
+
 	@Test
 	void testThatInvalidSalaryModifiedEmployeeIsNotListed() throws Exception {
 		EmployeeDto originalEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 500_000,
 				LocalDateTime.parse("2020-09-01T10:00:00"));
 		createEmployee(originalEmployee);
-		
+
 		EmployeeDto modifiedEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 0,
 				LocalDateTime.parse("2020-09-01T10:00:00"));
-		
-		modifyInvalidEmployee(modifiedEmployee);
+
+		modifyEmployee(modifiedEmployee, HttpStatus.BAD_REQUEST);
 
 		EmployeeDto employeeAfterModification = getEmployee(modifiedEmployee.getId());
 
 		assertThat(employeeAfterModification).usingRecursiveComparison().isEqualTo(originalEmployee);
 	}
-	
-	
+
 	private void createEmployee(EmployeeDto newEmployee) {
 		createEmployee(newEmployee, HttpStatus.OK);
 	}
@@ -96,51 +95,30 @@ public class EmployeeControllerIT {
 			.isEqualTo(status);
 	}
 
-	private void modifyEmployee(EmployeeDto newEmployee) {
-		webTestClient
-			.put()
-			.uri(BASE_URI + "/" + newEmployee.getId())
-			.bodyValue(newEmployee)
-			.exchange()
-			.expectStatus()
-			.isOk();
+	private void modifyEmployee(EmployeeDto modifiedEmployee) {
+		modifyEmployee(modifiedEmployee, HttpStatus.OK);
 	}
-	
-	private void modifyInvalidEmployee(EmployeeDto newEmployee) {
+
+	private void modifyEmployee(EmployeeDto modifiedEmployee, HttpStatus status) {
 		webTestClient
 			.put()
-			.uri(BASE_URI + "/" + newEmployee.getId())
-			.bodyValue(newEmployee)
+			.uri(BASE_URI + "/" + modifiedEmployee.getId())
+			.bodyValue(modifiedEmployee)
 			.exchange()
 			.expectStatus()
-			.isBadRequest();
-			
+			.isEqualTo(status);
 	}
 
 	private List<EmployeeDto> getAllEmployees() {
-		List<EmployeeDto> responseList = webTestClient
-				.get()
-				.uri(BASE_URI)
-				.exchange()
-				.expectStatus()
-				.isOk()
-				.expectBodyList(EmployeeDto.class)
-				.returnResult()
-				.getResponseBody();
+		List<EmployeeDto> responseList = webTestClient.get().uri(BASE_URI).exchange().expectStatus().isOk()
+				.expectBodyList(EmployeeDto.class).returnResult().getResponseBody();
 		Collections.sort(responseList, (e1, e2) -> Long.compare(e1.getId(), e2.getId()));
 		return responseList;
 	}
 
 	private EmployeeDto getEmployee(long id) {
-		EmployeeDto employee = webTestClient
-				.get()
-				.uri(BASE_URI+"/"+id)
-				.exchange()
-				.expectStatus()
-				.isOk()
-				.expectBody(EmployeeDto.class)
-				.returnResult()
-				.getResponseBody();
+		EmployeeDto employee = webTestClient.get().uri(BASE_URI + "/" + id).exchange().expectStatus().isOk()
+				.expectBody(EmployeeDto.class).returnResult().getResponseBody();
 		return employee;
 	}
 
