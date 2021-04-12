@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import hu.webuni.hr.mzsombor.dto.EmployeeDto;
@@ -42,7 +43,7 @@ public class EmployeeControllerIT {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
 		EmployeeDto newEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 0,
 				LocalDateTime.parse("2020-09-01T10:00:00"));
-		createInvalidEmployee(newEmployee);
+		createEmployee(newEmployee, HttpStatus.BAD_REQUEST);
 
 		List<EmployeeDto> employeesAfter = getAllEmployees();
 
@@ -81,27 +82,18 @@ public class EmployeeControllerIT {
 	}
 	
 	
-	
-	
-
 	private void createEmployee(EmployeeDto newEmployee) {
-		webTestClient
-			.post()
-			.uri(BASE_URI)
-			.bodyValue(newEmployee)
-			.exchange()
-			.expectStatus()
-			.isOk();
+		createEmployee(newEmployee, HttpStatus.OK);
 	}
-	
-	private void createInvalidEmployee(EmployeeDto newEmployee) {
+
+	private void createEmployee(EmployeeDto newEmployee, HttpStatus status) {
 		webTestClient
 			.post()
 			.uri(BASE_URI)
 			.bodyValue(newEmployee)
 			.exchange()
 			.expectStatus()
-			.isBadRequest();
+			.isEqualTo(status);
 	}
 
 	private void modifyEmployee(EmployeeDto newEmployee) {
