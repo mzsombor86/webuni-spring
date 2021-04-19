@@ -2,12 +2,26 @@ package hu.webuni.hr.mzsombor.model;
 
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+@Entity
 public class Company {
+	@Id
+	@GeneratedValue
 	private long registrationNumber;
 	private String name;
 	private String address;
+
+	@OneToMany(mappedBy = "company")
 	private List<Employee> employees;
 	
+	public Company() {
+		
+	}
+
 	public Company(long registrationNumber, String name, String address, List<Employee> employees) {
 		this.registrationNumber = registrationNumber;
 		this.name = name;
@@ -46,6 +60,5 @@ public class Company {
 	public void setEmployees(List<Employee> employees) {
 		this.employees = employees;
 	}
-		
 
 }
