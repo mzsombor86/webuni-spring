@@ -1,13 +1,22 @@
 package hu.webuni.airport.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.validation.constraints.Size;
 
+@Entity
+//@NamedQuery(name ="Airport.countByIata", query = "SELECT COUNT(a.id) from Airport a WHERE a.iata = :iata")
+//@NamedQuery(name ="Airport.countByIataAndIdNotIn", query = "SELECT COUNT(a.id) from Airport a WHERE a.iata = :iata AND a.id != :id")
 public class Airport {
 	
+	@Id
+	@GeneratedValue
 	private long id;
+	
 	@Size(min = 3, max = 20)
 	private String name;
-	
 	private String iata;
 	
 	public Airport() {
@@ -15,6 +24,7 @@ public class Airport {
 	}
 	
 	public Airport(long id, String name, String iata) {
+		super();
 		this.id = id;
 		this.name = name;
 		this.iata = iata;
