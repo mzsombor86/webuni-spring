@@ -16,17 +16,19 @@ public class EmployeeDto {
 	private int salary;
 	@Past
 	private LocalDateTime entryDate;
+	private String companyName;
 
 	public EmployeeDto() {
 
 	}
 
-	public EmployeeDto(long id, String name, String title, int salary, LocalDateTime entryDate) {
+	public EmployeeDto(long id, String name, String title, int salary, LocalDateTime entryDate, String companyName) {
 		this.id = id;
 		this.name = name;
 		this.title = title;
 		this.salary = salary;
 		this.entryDate = entryDate;
+		this.companyName = companyName;
 	}
 
 	public long getId() {
@@ -43,6 +45,14 @@ public class EmployeeDto {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
 	}
 
 	public String getTitle() {
@@ -71,8 +81,10 @@ public class EmployeeDto {
 
 	@Override
 	public String toString() {
-		return "Employee [id=" + id + ", name=" + name + ", title=" + title + ", salary=" + salary + ", entryDate="
-				+ entryDate + "]";
+		return "EmployeeDto [id=" + id + ", name=" + name + ", title=" + title + ", salary=" + salary + ", entryDate="
+				+ entryDate + ", companyName=" + companyName + "]";
 	}
+
+	
 
 }

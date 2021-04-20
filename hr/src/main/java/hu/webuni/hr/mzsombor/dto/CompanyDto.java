@@ -1,14 +1,13 @@
 package hu.webuni.hr.mzsombor.dto;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CompanyDto {
 	private long registrationNumber;
 	private String name;
 	private String address;
 	private List<EmployeeDto> employees;
-	
+
 	public CompanyDto(long registrationNumber, String name, String address, List<EmployeeDto> employees) {
 		this.registrationNumber = registrationNumber;
 		this.name = name;
@@ -47,6 +46,5 @@ public class CompanyDto {
 	public void setEmployees(List<EmployeeDto> employees) {
 		this.employees = employees;
 	}
-		
 
 }

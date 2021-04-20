@@ -27,7 +27,7 @@ public class EmployeeControllerIT {
 	void testThatCreatedEmployeeIsListed() throws Exception {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
 		EmployeeDto newEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 500_000,
-				LocalDateTime.parse("2020-09-01T10:00:00"));
+				LocalDateTime.parse("2020-09-01T10:00:00"), "");
 		createEmployee(newEmployee);
 
 		List<EmployeeDto> employeesAfter = getAllEmployees();
@@ -42,7 +42,7 @@ public class EmployeeControllerIT {
 	void testThatInvalidSalaryCreatedEmployeeIsNotListed() throws Exception {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
 		EmployeeDto newEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 0,
-				LocalDateTime.parse("2020-09-01T10:00:00"));
+				LocalDateTime.parse("2020-09-01T10:00:00"), "");
 		createEmployee(newEmployee, HttpStatus.BAD_REQUEST);
 
 		List<EmployeeDto> employeesAfter = getAllEmployees();
@@ -53,11 +53,11 @@ public class EmployeeControllerIT {
 	@Test
 	void testThatModifiedEmployeeIsListed() throws Exception {
 		EmployeeDto originalEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 500_000,
-				LocalDateTime.parse("2020-09-01T10:00:00"));
+				LocalDateTime.parse("2020-09-01T10:00:00"), "");
 		createEmployee(originalEmployee);
 
 		EmployeeDto modifiedEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 600_000,
-				LocalDateTime.parse("2020-09-01T10:00:00"));
+				LocalDateTime.parse("2020-09-01T10:00:00"), "");
 		modifyEmployee(modifiedEmployee);
 
 		EmployeeDto employeeAfterModification = getEmployee(modifiedEmployee.getId());
@@ -68,11 +68,11 @@ public class EmployeeControllerIT {
 	@Test
 	void testThatInvalidSalaryModifiedEmployeeIsNotListed() throws Exception {
 		EmployeeDto originalEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 500_000,
-				LocalDateTime.parse("2020-09-01T10:00:00"));
+				LocalDateTime.parse("2020-09-01T10:00:00"), "");
 		createEmployee(originalEmployee);
 
 		EmployeeDto modifiedEmployee = new EmployeeDto(10, "Margetán Zsombor", "developer", 0,
-				LocalDateTime.parse("2020-09-01T10:00:00"));
+				LocalDateTime.parse("2020-09-01T10:00:00"), "");
 
 		modifyEmployee(modifiedEmployee, HttpStatus.BAD_REQUEST);
 

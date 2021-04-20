@@ -17,9 +17,9 @@ public class Company {
 
 	@OneToMany(mappedBy = "company")
 	private List<Employee> employees;
-	
+
 	public Company() {
-		
+
 	}
 
 	public Company(long registrationNumber, String name, String address, List<Employee> employees) {

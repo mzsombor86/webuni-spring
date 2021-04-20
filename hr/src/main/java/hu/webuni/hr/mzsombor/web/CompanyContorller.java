@@ -21,7 +21,10 @@ import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 import hu.webuni.hr.mzsombor.mapper.CompanyMapper;
 import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.model.Company;
+import hu.webuni.hr.mzsombor.model.Employee;
 import hu.webuni.hr.mzsombor.service.CompanyService;
+import hu.webuni.hr.mzsombor.service.EmployeeService;
+import javassist.NotFoundException;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -29,6 +32,9 @@ public class CompanyContorller {
 
 	@Autowired
 	CompanyService companyService;
+
+	@Autowired
+	EmployeeService employeeService;
 
 	@Autowired
 	CompanyMapper companyMapper;
@@ -64,7 +70,9 @@ public class CompanyContorller {
 	// Egy új cég hozzáadása
 	@PostMapping
 	public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
-		return companyMapper.companyToDto(companyService.save(companyMapper.dtoToCompany(companyDto)));
+		Company company = companyMapper.dtoToCompany(companyDto);
+		companyService.addEmployeesToACompany(company, company.getEmployees());
+		return companyMapper.companyToDto(companyService.save(company));
 	}
 
 	// Egy adott cég módosítása
@@ -73,24 +81,33 @@ public class CompanyContorller {
 			@RequestBody CompanyDto companyDto) {
 		if (companyService.findById(registrationNumber) == null)
 			return ResponseEntity.notFound().build();
-
 		companyDto.setRegistrationNumber(registrationNumber);
-		companyService.save(companyMapper.dtoToCompany(companyDto));
-		return ResponseEntity.ok(companyDto);
+		Company company = companyMapper.dtoToCompany(companyDto);
+		companyService.addEmployeesToACompany(company, company.getEmployees());
+		companyService.save(company);
+		return ResponseEntity.ok(companyMapper.companyToDto(companyService.save(company)));
 	}
 
 	// Adott cég törlése
 	@DeleteMapping("/{registrationNumber}")
 	public void deleteCompany(@PathVariable long registrationNumber) {
-		companyService.delete(registrationNumber);
+		try {
+			companyService.delete(registrationNumber);
+		} catch (NotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
 	}
 
 	// Alkalmazott hozzáadása egy céghez
 	@PostMapping("/{registrationNumber}/employee")
 	public CompanyDto addEmployeeToACompany(@PathVariable long registrationNumber,
 			@RequestBody EmployeeDto employeeDto) {
-		Company company = companyService.findById(registrationNumber).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		company.getEmployees().add(employeeMapper.dtoToEmployee(employeeDto));
+		Company company = companyService.findById(registrationNumber)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		Employee employee = employeeMapper.dtoToEmployee(employeeDto);
+		companyService.addEmployeeToACompany(company, employee);
+		// employeeService.save(employee);
+		companyService.save(company);
 		return companyMapper.companyToDto(companyService.save(company));
 	}
 
@@ -99,17 +116,29 @@ public class CompanyContorller {
 	public CompanyDto modifyEmployeesOfACompany(@PathVariable long registrationNumber,
 			@RequestBody List<EmployeeDto> employeeDtos) {
 
-		Company company = companyService.findById(registrationNumber).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		company.setEmployees(employeeMapper.dtosToEmployees(employeeDtos));
+		Company company = companyService.findById(registrationNumber)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		companyService.removeAllEmployeesFromACompany(company);
+		companyService.addEmployeesToACompany(company, employeeMapper.dtosToEmployees(employeeDtos));
 		return companyMapper.companyToDto(companyService.save(company));
 	}
 
 	// Egy cég egy bizonyos alkalmazottjának törlése
 	@DeleteMapping("/{registrationNumber}/employee/{id}")
 	public void deleteEmployeeFromACompany(@PathVariable long registrationNumber, @PathVariable long id) {
-		Company company = companyService.findById(registrationNumber).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		company.getEmployees().removeIf(e -> e.getId() == id);
+		Company company = companyService.findById(registrationNumber)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		Employee employee = employeeService.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		companyService.removeEmployeeFromACompany(company, employee);
+		employeeService.delete(employee.getId());
 		companyService.save(company);
+	}
+
+	// Minden cég törlése
+	@DeleteMapping
+	public void deleteAll() {
+		companyService.deleteAll();
 	}
 
 }

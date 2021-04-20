@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.model.Employee;
-import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
 import hu.webuni.hr.mzsombor.service.EmployeeService;
 
 @RestController
@@ -34,9 +33,6 @@ public class EmployeeController {
 
 	@Autowired
 	EmployeeMapper employeeMapper;
-
-	@Autowired
-	EmployeeRepository employeeRepository;
 
 	// Az összes alkalmazott kilistázása
 	@GetMapping
@@ -93,19 +89,25 @@ public class EmployeeController {
 	// Bizonyos titulusú alkalmazottak kilistázása
 	@GetMapping(params = "title")
 	public List<EmployeeDto> getByTitle(@RequestParam String title) {
-		return employeeMapper.employeesToDtos(employeeRepository.findByTitle(title));
+		return employeeMapper.employeesToDtos(employeeService.findByTitle(title));
 	}
 
 	// Bizonyos névvel kezdődő alkalmazottak kilistázása
 	@GetMapping(params = "name")
 	public List<EmployeeDto> getByName(@RequestParam String name) {
-		return employeeMapper.employeesToDtos(employeeRepository.findByNameStartingWithIgnoreCase(name));
+		return employeeMapper.employeesToDtos(employeeService.findByName(name));
 	}
 
 	// Bizonyos belépési dátumok között belépett alkalmazottak kilistázása
 	@GetMapping(params = {"startDate","endDate"})
 	public List<EmployeeDto> getByEntryDate(@RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) {
-		return employeeMapper.employeesToDtos(employeeRepository.findByEntryDateBetween(startDate, endDate));
+		return employeeMapper.employeesToDtos(employeeService.findByEntryDate(startDate, endDate));
+	}
+	
+	// Minden alkalmazott törlése
+	@DeleteMapping
+	public void deleteAllEmployee() {
+		employeeService.deleteAll();
 	}
 
 }
