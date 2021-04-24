@@ -1,6 +1,5 @@
 package hu.webuni.hr.mzsombor.service;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +11,6 @@ import hu.webuni.hr.mzsombor.model.Company;
 import hu.webuni.hr.mzsombor.model.Employee;
 import hu.webuni.hr.mzsombor.repository.CompanyRepository;
 import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
-import javassist.NotFoundException;
 
 @Service
 public class CompanyService {
@@ -31,52 +29,54 @@ public class CompanyService {
 		return companyRepository.findById(id);
 	}
 
-	public Company addEmployeeToACompany(Company company, Employee employee) {
-		employee.setCompany(company);
-		company.getEmployees().add(employee);
+	@Transactional
+	public Company addEmployee(Long id, Employee employee) {
+		Company company = companyRepository.findById(id).get();
+		company.addEmployee(employee);
+		employeeRepository.save(employee);
 		return company;
 	}
 
-	public Company addEmployeesToACompany(Company company, List<Employee> employees) {
-		Iterator<Employee> it = employees.iterator();
-		while (it.hasNext())
-			it.next().setCompany(company);
-		company.setEmployees(employees);
-		return company;
 
-	}
-
-	public Company removeEmployeeFromACompany(Company company, Employee employee) {
+	@Transactional
+	public Company deleteEmployee(long id, long employeeId) {
+		Company company = companyRepository.findById(id).get();
+		Employee employee = employeeRepository.findById(employeeId).get();
 		employee.setCompany(null);
-		company.getEmployees().removeIf(e -> e.getId() == employee.getId());
+		company.getEmployees().remove(employee);
+		employeeRepository.save(employee);
+		return company;
+	}
+	
+	@Transactional
+	public Company replaceEmployees(long id, List<Employee> employees) {
+		Company company = companyRepository.findById(id).get();
+		company.getEmployees().stream().forEach(e -> e.setCompany(null));
+		company.getEmployees().clear();
+		for (Employee employee : employees) {
+			company.addEmployee(employee);
+			employeeRepository.save(employee);
+		}
 		return company;
 	}
 
-	public Company removeAllEmployeesFromACompany(Company company) {
-		Iterator<Employee> it = company.getEmployees().iterator();
-		while (it.hasNext())
-			it.next().setCompany(null);
-		employeeRepository.deleteInBatch(company.getEmployees());
-		company.setEmployees(null);
-		return company;
-	}
+
 
 	@Transactional
 	public Company save(Company company) {
-		employeeRepository.saveAll(company.getEmployees());
 		return companyRepository.save(company);
 	}
 
 	@Transactional
-	public void delete(long id) throws NotFoundException {
-		Company company = companyRepository.findById(id).orElseThrow(() -> new NotFoundException(null));
-		removeAllEmployeesFromACompany(company);
-		companyRepository.deleteById(id);
+	public Company update(Company company) {
+		if (!companyRepository.existsById(company.getRegistrationNumber()))
+			return null;
+		return companyRepository.save(company);
 	}
 
 	@Transactional
-	public void deleteAll() {
-		companyRepository.deleteAll();
+	public void delete(long id) {
+		companyRepository.deleteById(id);
 	}
 
 }

@@ -45,6 +45,14 @@ public abstract class EmployeeService {
 	public Employee save(Employee employee) {
 		return employeeRepository.save(employee);
 	}
+	
+	@Transactional
+	public Employee update(Employee employee) {
+		if (!employeeRepository.existsById(employee.getId()))
+			return null;
+		return employeeRepository.save(employee);
+	}
+	
 
 	@Transactional
 	public void delete(long id) {

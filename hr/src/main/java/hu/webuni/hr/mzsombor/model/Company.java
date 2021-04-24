@@ -1,5 +1,6 @@
 package hu.webuni.hr.mzsombor.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -60,5 +61,13 @@ public class Company {
 	public void setEmployees(List<Employee> employees) {
 		this.employees = employees;
 	}
+
+	public void addEmployee(Employee employee) {
+		if (this.employees == null)
+			this.employees = new ArrayList<>();
+		this.employees.add(employee);
+		employee.setCompany(this);
+	}
+	
 
 }

@@ -62,7 +62,6 @@ public class EmployeeController {
 			@RequestBody @Valid EmployeeDto employeeDto) {
 		if (employeeService.findById(id) == null)
 			return ResponseEntity.notFound().build();
-
 		employeeDto.setId(id);
 		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
 		return ResponseEntity.ok(employeeMapper.employeeToDto(employee));
@@ -104,10 +103,5 @@ public class EmployeeController {
 		return employeeMapper.employeesToDtos(employeeService.findByEntryDate(startDate, endDate));
 	}
 	
-	// Minden alkalmazott törlése
-	@DeleteMapping
-	public void deleteAllEmployee() {
-		employeeService.deleteAll();
-	}
 
 }
