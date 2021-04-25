@@ -25,6 +25,7 @@ import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.model.Company;
 import hu.webuni.hr.mzsombor.repository.CompanyRepository;
 import hu.webuni.hr.mzsombor.service.CompanyService;
+import hu.webuni.hr.mzsombor.service.LegalFormService;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -35,6 +36,9 @@ public class CompanyContorller {
 
 	@Autowired
 	CompanyRepository companyRepository;
+
+	@Autowired
+	LegalFormService legalFormService;
 
 	@Autowired
 	CompanyMapper companyMapper;
@@ -93,7 +97,8 @@ public class CompanyContorller {
 		return companyDto;
 	}
 
-	// Egy adott vállalat alkalmazottainak átlagfizetése, titulusuk szerint csoportosítva.
+	// Egy adott vállalat alkalmazottainak átlagfizetése, titulusuk szerint
+	// csoportosítva.
 	@GetMapping(value = "/{id}", params = "avgSalaryByTitle")
 	public List<AvgSalaryDto> getAverageSalariesByTitleAtACompany(@PathVariable long id,
 			@RequestParam boolean avgSalaryByTitle) {
@@ -108,6 +113,8 @@ public class CompanyContorller {
 	@PostMapping
 	public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
 		Company company = companyMapper.dtoToCompany(companyDto);
+		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY)));
 		return companyMapper.companyToDto(companyService.save(company));
 	}
 
@@ -116,7 +123,10 @@ public class CompanyContorller {
 	public ResponseEntity<CompanyDto> modifyCompany(@PathVariable long registrationNumber,
 			@RequestBody CompanyDto companyDto) {
 		companyDto.setRegistrationNumber(registrationNumber);
-		Company updatedCompany = companyService.update(companyMapper.dtoToCompany(companyDto));
+		Company company = companyMapper.dtoToCompany(companyDto);
+		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY)));
+		Company updatedCompany = companyService.update(company);
 		if (updatedCompany == null)
 			return ResponseEntity.notFound().build();
 		return ResponseEntity.ok(companyMapper.companyToDto(companyService.save(updatedCompany)));

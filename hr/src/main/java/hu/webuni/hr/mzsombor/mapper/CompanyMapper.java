@@ -21,14 +21,19 @@ public interface CompanyMapper {
 	List<CompanyDto> companiesToSummaryDtos(List<Company> company);
 
 	@Mapping(target = "employees", ignore = true)
+	@Mapping(source = "legalForm.form", target = "legalForm")
 	@Named("summary")
 	CompanyDto companyToSummaryDto(Company company);
 
+	@Mapping(source = "legalForm.form", target = "legalForm")
 	CompanyDto companyToDto(Company company);
 
+	@Mapping(target = "legalForm", ignore = true)
 	Company dtoToCompany(CompanyDto companyDto);
 
 	@Mapping(source = "company.name", target = "companyName")
 	EmployeeDto employeeToDto(Employee employee);
+	
+	
 
 }

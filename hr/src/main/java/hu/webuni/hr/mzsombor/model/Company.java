@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -15,6 +16,9 @@ public class Company {
 	private long registrationNumber;
 	private String name;
 	private String address;
+	
+	@ManyToOne
+	private LegalForm legalForm;
 
 	@OneToMany(mappedBy = "company")
 	private List<Employee> employees;
@@ -23,12 +27,16 @@ public class Company {
 
 	}
 
-	public Company(long registrationNumber, String name, String address, List<Employee> employees) {
+	public Company(long registrationNumber, String name, String address, LegalForm legalForm,
+			List<Employee> employees) {
 		this.registrationNumber = registrationNumber;
 		this.name = name;
 		this.address = address;
+		this.legalForm = legalForm;
 		this.employees = employees;
 	}
+
+
 
 	public long getRegistrationNumber() {
 		return registrationNumber;
@@ -60,6 +68,15 @@ public class Company {
 
 	public void setEmployees(List<Employee> employees) {
 		this.employees = employees;
+	}
+
+	
+	public LegalForm getLegalForm() {
+		return legalForm;
+	}
+
+	public void setLegalForm(LegalForm legalForm) {
+		this.legalForm = legalForm;
 	}
 
 	public void addEmployee(Employee employee) {

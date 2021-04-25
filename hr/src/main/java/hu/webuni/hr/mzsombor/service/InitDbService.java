@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import hu.webuni.hr.mzsombor.model.Company;
 import hu.webuni.hr.mzsombor.model.Employee;
+import hu.webuni.hr.mzsombor.model.LegalForm;
 import hu.webuni.hr.mzsombor.repository.CompanyRepository;
 import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
+import hu.webuni.hr.mzsombor.repository.LegalFormRepository;
 
 @Service
 public class InitDbService {
@@ -20,6 +22,9 @@ public class InitDbService {
 
 	@Autowired
 	EmployeeRepository employeeRepository;
+	
+	@Autowired 
+	LegalFormRepository legalFormRepository;
 
 	@Autowired
 	CompanyService companyService;
@@ -27,16 +32,23 @@ public class InitDbService {
 	public void clearDB() {
 		employeeRepository.deleteAll();
 		companyRepository.deleteAll();
+		legalFormRepository.deleteAll();
 	}
 
 	public void insertTestData() {
+		
+		legalFormRepository.save(new LegalForm(1,"nyrt"));
+		legalFormRepository.save(new LegalForm(2,"zrt"));
+		legalFormRepository.save(new LegalForm(3,"bt"));
+		legalFormRepository.save(new LegalForm(4,"kft"));
+		
 
 		List<Company> companies = new ArrayList<>();
-		companies.add(new Company(1, "JavaWorks", "1111 Budapest, Java Street 1.", null));
-		companies.add(new Company(2, "SpringWorks", "2222 Budapest, Spring Street 1.", null));
-		companies.add(new Company(3, "HtmlWorks", "3333 Budapest, Html Street 1.", null));
-		companies.add(new Company(4, "CSSWorks", "4444 Budapest, CSS Street 1.", null));
-		companies.add(new Company(5, "NodeJSWorks", "5555 Budapest, NodeJS Street 1.", null));
+		companies.add(new Company(1, "JavaWorks", "1111 Budapest, Java Street 1.", legalFormRepository.findByForm("nyrt").get(), null));
+		companies.add(new Company(2, "SpringWorks", "2222 Budapest, Spring Street 1.", legalFormRepository.findByForm("zrt").get() ,null));
+		companies.add(new Company(3, "HtmlWorks", "3333 Budapest, Html Street 1.", legalFormRepository.findByForm("kft").get(), null));
+		companies.add(new Company(4, "CSSWorks", "4444 Budapest, CSS Street 1.", legalFormRepository.findByForm("bt").get(), null));
+		companies.add(new Company(5, "NodeJSWorks", "5555 Budapest, NodeJS Street 1.", legalFormRepository.findByForm("nyrt").get(), null));
 
 		int i = 0;
 		
