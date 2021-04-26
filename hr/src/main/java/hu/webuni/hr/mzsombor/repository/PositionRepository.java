@@ -1,5 +1,6 @@
 package hu.webuni.hr.mzsombor.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,9 +10,10 @@ import hu.webuni.hr.mzsombor.model.Position;
 
 public interface PositionRepository extends JpaRepository<Position, Long>{
 	
-	Optional<Position> findByName(String name);
+	List<Position> findByName(String name);
 
 	Optional<Position> findByNameAndCompany(String name, Company company);
+	
 	
 
 }

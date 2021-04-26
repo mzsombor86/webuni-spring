@@ -1,6 +1,7 @@
 package hu.webuni.hr.mzsombor.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,8 +41,13 @@ public abstract class EmployeeService {
 	}
 
 	public List<Employee> findByPosition(String title) {
-		Position position = positionService.findByName(title).get();
-		return employeeRepository.findByPosition(position);
+		List<Position> positions = positionService.findByName(title);
+		List<Employee> employees = new ArrayList<>();
+		for (Position position : positions) {
+			employees.addAll(employeeRepository.findByPosition(position));
+		}
+		return employees;
+		
 	}
 
 	public List<Employee> findByName(String name) {

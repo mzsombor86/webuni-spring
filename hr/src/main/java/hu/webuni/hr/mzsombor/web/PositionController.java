@@ -1,5 +1,6 @@
 package hu.webuni.hr.mzsombor.web;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,12 +36,29 @@ public class PositionController {
 	PositionMapper positionMapper;
 	
 	@GetMapping
-	List<PositionDto> getPositions() {
+	public List<PositionDto> getPositions() {
 		return positionMapper.positionsToDtos(positionService.findAll());
 	}
 	
+	@GetMapping(params="name")
+	public List<PositionDto> getPositionsByName(String name) {
+		return positionMapper.positionsToDtos(positionService.findByName(name));
+	}
+	
+	@GetMapping("/raiseMinSalary")
+	public List<PositionDto> raiseMinSalary(@RequestParam int minSalary, @RequestParam String positionName, @RequestParam(required = false) Long registrationNumber) {
+		List<PositionDto> positionDtos;
+		if (registrationNumber == null) {
+			positionDtos = positionMapper.positionsToDtos(positionService.setMinSalaryAndRaiseSalaryToMinByPositionName(minSalary,positionName));
+		} else {
+			positionDtos = new ArrayList<>();
+			positionDtos.add(positionMapper.positionToDto(positionService.setMinSalaryAndRaiseSalaryToMinByPositionNameAndCompaniId(minSalary,positionName,registrationNumber)));
+		}
+		return positionDtos;
+	}
+	
 	@PostMapping
-	PositionDto addPosition(@RequestBody PositionDto positionDto) {
+	public PositionDto addPosition(@RequestBody PositionDto positionDto) {
 		Position position = positionMapper.dtoToPosition(positionDto);
 		if (positionDto.getCompany() != null)
 			position.setCompany(companyService.findByName(positionDto.getCompany()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
@@ -47,7 +66,7 @@ public class PositionController {
 	}
 	
 	@PutMapping("/{id}")
-	PositionDto changePosition(@RequestBody PositionDto positionDto, @PathVariable long id ) {
+	public PositionDto changePosition(@RequestBody PositionDto positionDto, @PathVariable long id ) {
 		positionService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		positionDto.setId(id);
 		Position position = positionMapper.dtoToPosition(positionDto);
@@ -56,8 +75,8 @@ public class PositionController {
 		return positionMapper.positionToDto(positionService.update(position));
 	}
 	
-	@DeleteMapping("{/id}")
-	void deletePosition(@PathVariable long id) {
+	@DeleteMapping("/{id}")
+	public void deletePosition(@PathVariable long id) {
 		positionService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		positionService.delete(id);
 	}
