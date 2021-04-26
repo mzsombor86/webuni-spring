@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import hu.webuni.hr.mzsombor.model.Employee;
@@ -31,6 +33,10 @@ public abstract class EmployeeService {
 
 	public List<Employee> findAboveASalary(int aboveSalary) {
 		return employeeRepository.findBySalaryGreaterThan(aboveSalary);
+	}
+	
+	public Page<Employee> findAboveASalary(int aboveSalary, Pageable pageable) {
+		return employeeRepository.findBySalaryGreaterThan(aboveSalary, pageable);
 	}
 
 	public List<Employee> findByPosition(String title) {

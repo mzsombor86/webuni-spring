@@ -7,6 +7,9 @@ import java.util.NoSuchElementException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -83,6 +86,14 @@ public class EmployeeController {
 	public List<EmployeeDto> getAboveASalary(@RequestParam int aboveSalary) {
 		return employeeMapper.employeesToDtos(employeeService.findAboveASalary(aboveSalary));
 	}
+	
+	// Bizonyos fizetés fölötti alkalmazottak kilistázása lapozhatóan
+		@GetMapping(params = {"aboveSalaryPageable","pageSize","pageNumber"})
+		public List<EmployeeDto> getAboveASalaryPageable(@RequestParam int aboveSalaryPageable, @RequestParam int pageSize, @RequestParam int pageNumber) {
+			Pageable page = PageRequest.of(pageNumber, pageSize);
+			Page<Employee> employeePage = employeeService.findAboveASalary(aboveSalaryPageable, page);
+			return employeePage.map(employeeMapper::employeeToDto).toList();
+		}
 
 	// Beküldött alkalmazott fizetésemelésének mértékének meghatározása.
 	@PostMapping("/getraisepercentage")
