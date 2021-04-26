@@ -16,9 +16,12 @@ public class Company {
 	private long registrationNumber;
 	private String name;
 	private String address;
-	
+
 	@ManyToOne
 	private LegalForm legalForm;
+
+	@OneToMany(mappedBy = "company")
+	private List<Position> positions;
 
 	@OneToMany(mappedBy = "company")
 	private List<Employee> employees;
@@ -27,16 +30,15 @@ public class Company {
 
 	}
 
-	public Company(long registrationNumber, String name, String address, LegalForm legalForm,
+	public Company(long registrationNumber, String name, String address, LegalForm legalForm, List<Position> positions,
 			List<Employee> employees) {
 		this.registrationNumber = registrationNumber;
 		this.name = name;
 		this.address = address;
 		this.legalForm = legalForm;
+		this.positions = positions;
 		this.employees = employees;
 	}
-
-
 
 	public long getRegistrationNumber() {
 		return registrationNumber;
@@ -70,13 +72,20 @@ public class Company {
 		this.employees = employees;
 	}
 
-	
 	public LegalForm getLegalForm() {
 		return legalForm;
 	}
 
 	public void setLegalForm(LegalForm legalForm) {
 		this.legalForm = legalForm;
+	}
+
+	public List<Position> getPositions() {
+		return positions;
+	}
+
+	public void setPositions(List<Position> positions) {
+		this.positions = positions;
 	}
 
 	public void addEmployee(Employee employee) {
@@ -86,5 +95,11 @@ public class Company {
 		employee.setCompany(this);
 	}
 	
+	public void addosition(Position position) {
+		if (this.positions == null)
+			this.positions = new ArrayList<>();
+		this.positions.add(position);
+		position.setCompany(this);
+	}
 
 }

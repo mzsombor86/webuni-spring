@@ -18,12 +18,16 @@ public class Employee {
 	private long id;
 	@NotEmpty
 	private String name;
-	@NotEmpty
-	private String title;
+	
+	@ManyToOne
+	@JoinColumn(name="position_id")
+	private Position position;
+	
 	@Min(value = 1)
 	private int salary;
 	@Past
 	private LocalDateTime entryDate;
+	
 	@ManyToOne
 	@JoinColumn(name="company_id")
 	private Company company;
@@ -32,10 +36,10 @@ public class Employee {
 
 	}
 
-	public Employee(long id, String name, String title, int salary, LocalDateTime entryDate, Company company) {
+	public Employee(long id, String name, Position position, int salary, LocalDateTime entryDate, Company company) {
 		this.id = id;
 		this.name = name;
-		this.title = title;
+		this.position = position;
 		this.salary = salary;
 		this.entryDate = entryDate;
 		this.company = company;
@@ -57,12 +61,12 @@ public class Employee {
 		this.name = name;
 	}
 
-	public String getTitle() {
-		return title;
+	public Position getPosition() {
+		return position;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setPosition(Position position) {
+		this.position = position;
 	}
 
 	public int getSalary() {
@@ -91,7 +95,7 @@ public class Employee {
 
 	@Override
 	public String toString() {
-		return "Employee [id=" + id + ", name=" + name + ", title=" + title + ", salary=" + salary + ", entryDate="
+		return "Employee [id=" + id + ", name=" + name + ", position=" + position + ", salary=" + salary + ", entryDate="
 				+ entryDate + "]";
 	}
 

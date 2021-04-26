@@ -28,6 +28,10 @@ public class CompanyService {
 	public Optional<Company> findById(long id) {
 		return companyRepository.findById(id);
 	}
+	
+	public Optional<Company> findByName(String name) {
+		return companyRepository.findByName(name);
+	}
 
 	@Transactional
 	public Company addEmployee(Long id, Employee employee) {
@@ -48,18 +52,14 @@ public class CompanyService {
 		return company;
 	}
 	
+	
 	@Transactional
-	public Company replaceEmployees(long id, List<Employee> employees) {
+	public Company deleteEmployeesOfACompany(long id) {
 		Company company = companyRepository.findById(id).get();
 		company.getEmployees().stream().forEach(e -> e.setCompany(null));
 		company.getEmployees().clear();
-		for (Employee employee : employees) {
-			company.addEmployee(employee);
-			employeeRepository.save(employee);
-		}
 		return company;
 	}
-
 
 
 	@Transactional

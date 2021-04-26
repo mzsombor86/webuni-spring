@@ -8,12 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import hu.webuni.hr.mzsombor.model.Employee;
+import hu.webuni.hr.mzsombor.model.Position;
 import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
 
 public abstract class EmployeeService {
 
 	@Autowired
 	EmployeeRepository employeeRepository;
+	
+	@Autowired
+	PositionService positionService;
 
 	public abstract int getPayRaisePercent(Employee employee);
 
@@ -29,8 +33,9 @@ public abstract class EmployeeService {
 		return employeeRepository.findBySalaryGreaterThan(aboveSalary);
 	}
 
-	public List<Employee> findByTitle(String title) {
-		return employeeRepository.findByTitle(title);
+	public List<Employee> findByPosition(String title) {
+		Position position = positionService.findByName(title).get();
+		return employeeRepository.findByPosition(position);
 	}
 
 	public List<Employee> findByName(String name) {

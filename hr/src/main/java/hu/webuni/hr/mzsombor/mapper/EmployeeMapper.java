@@ -13,9 +13,11 @@ import hu.webuni.hr.mzsombor.model.Employee;
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
 
+	@Mapping(source="position.name", target="title")
 	@Mapping(source="company.name", target="companyName")
 	List<EmployeeDto> employeesToDtos(List<Employee> employees);
 
+	@Mapping(source="position.name", target="title")
 	@Mapping(source="company.name", target="companyName")
 	EmployeeDto employeeToDto(Employee employee);
 

@@ -23,9 +23,11 @@ import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 import hu.webuni.hr.mzsombor.mapper.CompanyMapper;
 import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.model.Company;
+import hu.webuni.hr.mzsombor.model.Employee;
 import hu.webuni.hr.mzsombor.repository.CompanyRepository;
 import hu.webuni.hr.mzsombor.service.CompanyService;
 import hu.webuni.hr.mzsombor.service.LegalFormService;
+import hu.webuni.hr.mzsombor.service.PositionService;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -39,6 +41,9 @@ public class CompanyContorller {
 
 	@Autowired
 	LegalFormService legalFormService;
+
+	@Autowired
+	PositionService positionService;
 
 	@Autowired
 	CompanyMapper companyMapper;
@@ -113,7 +118,7 @@ public class CompanyContorller {
 	@PostMapping
 	public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
 		Company company = companyMapper.dtoToCompany(companyDto);
-		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm())
+		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm().getForm())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY)));
 		return companyMapper.companyToDto(companyService.save(company));
 	}
@@ -124,7 +129,7 @@ public class CompanyContorller {
 			@RequestBody CompanyDto companyDto) {
 		companyDto.setRegistrationNumber(registrationNumber);
 		Company company = companyMapper.dtoToCompany(companyDto);
-		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm())
+		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm().getForm())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY)));
 		Company updatedCompany = companyService.update(company);
 		if (updatedCompany == null)
@@ -143,8 +148,11 @@ public class CompanyContorller {
 	public CompanyDto addEmployeeToACompany(@PathVariable long registrationNumber,
 			@RequestBody EmployeeDto employeeDto) {
 		try {
-			return companyMapper.companyToDto(
-					companyService.addEmployee(registrationNumber, employeeMapper.dtoToEmployee(employeeDto)));
+			Employee employee = employeeMapper.dtoToEmployee(employeeDto);
+			positionService
+					.findByNameAndCompany(employeeDto.getTitle(), companyService.findById(registrationNumber).get())
+					.get().addEmployee(employee);
+			return companyMapper.companyToDto(companyService.addEmployee(registrationNumber, employee));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
@@ -155,8 +163,11 @@ public class CompanyContorller {
 	public CompanyDto modifyEmployeesOfACompany(@PathVariable long registrationNumber,
 			@RequestBody List<EmployeeDto> employeeDtos) {
 		try {
-			return companyMapper.companyToDto(
-					companyService.replaceEmployees(registrationNumber, employeeMapper.dtosToEmployees(employeeDtos)));
+			companyService.deleteEmployeesOfACompany(registrationNumber);
+			for (EmployeeDto employeeDto : employeeDtos) {
+				addEmployeeToACompany(registrationNumber, employeeDto);
+			}
+			return companyMapper.companyToDto(companyService.findById(registrationNumber).get());
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}

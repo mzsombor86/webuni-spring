@@ -1,7 +1,8 @@
-package hu.webuni.hr.mzsombor.web;
+ package hu.webuni.hr.mzsombor.web;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.validation.Valid;
 
@@ -23,6 +24,7 @@ import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.model.Employee;
 import hu.webuni.hr.mzsombor.service.EmployeeService;
+import hu.webuni.hr.mzsombor.service.PositionService;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -30,6 +32,9 @@ public class EmployeeController {
 
 	@Autowired
 	EmployeeService employeeService;
+	
+	@Autowired
+	PositionService positionService;
 
 	@Autowired
 	EmployeeMapper employeeMapper;
@@ -88,7 +93,13 @@ public class EmployeeController {
 	// Bizonyos titulusú alkalmazottak kilistázása
 	@GetMapping(params = "title")
 	public List<EmployeeDto> getByTitle(@RequestParam String title) {
-		return employeeMapper.employeesToDtos(employeeService.findByTitle(title));
+		List<Employee> employees;
+		try {
+			employees = employeeService.findByPosition(title);
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		return employeeMapper.employeesToDtos(employees);
 	}
 
 	// Bizonyos névvel kezdődő alkalmazottak kilistázása
