@@ -6,8 +6,11 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import hu.webuni.airport.model.Airport;
 import hu.webuni.airport.model.Flight;
@@ -17,23 +20,14 @@ import hu.webuni.airport.repository.FlightRepository;
 @Service
 public class AirportService {
 
-//	private Map<Long, Airport> airports = new HashMap<>();
-//
-//	{
-//		airports.put(1L, new Airport(1, "abc", "XYZ"));
-//		airports.put(2L, new Airport(2, "def", "UVW"));
-//		airports.put(3L, new Airport(3, "ghi", "RST"));
-//
-//	}
-
-//	@PersistenceContext
-//	EntityManager em;
-
 	@Autowired
 	AirportRepository airportRepository;
 
 	@Autowired
 	FlightRepository flightRepository;
+	
+	@Autowired
+	LogEntryService logEntryService;
 
 	@Transactional
 	public Airport save(Airport airport) {
@@ -41,13 +35,14 @@ public class AirportService {
 //		em.persist(airport);
 		return airportRepository.save(airport);
 	}
-
+	
 	@Transactional
 	public Airport update(Airport airport) {
 		checkUniqueIata(airport.getIata(), airport.getId());
-		if (airportRepository.existsById(airport.getId()))
+		if (airportRepository.existsById(airport.getId())) {
+			logEntryService.createLog(String.format("Airport modified with id: %d new name is %s", airport.getId(), airport.getName()));
 			return airportRepository.save(airport);
-		else
+		} else
 			throw new NoSuchElementException();
 //		return em.merge(airport);
 
@@ -84,14 +79,40 @@ public class AirportService {
 	}
 
 	@Transactional
-	public void createFlight() {
+	public Flight createFlight(String flightNumber, long takeoffAirportId, long landingAirportId,
+			LocalDateTime takeoffDateTime) {
 		Flight flight = new Flight();
-		flight.setFlightNumber("WZ6054");
-		flight.setTakeoff(airportRepository.findById(1L).get());
-		flight.setLanding(airportRepository.findById(4L).get());
-		flight.setTakeoffTime(LocalDateTime.of(2021, 4, 10, 10, 0, 0));
-		flightRepository.save(flight);
-
+		flight.setFlightNumber(flightNumber);
+		flight.setTakeoff(airportRepository.findById(takeoffAirportId).get());
+		flight.setLanding(airportRepository.findById(landingAirportId).get());
+		flight.setTakeoffTime(takeoffDateTime);
+		return flightRepository.save(flight);
 	}
-
+	
+	public List<Flight> findFlightsByExapmle(Flight example) {
+		 long id = example.getId();
+		 String flightNumber = example.getFlightNumber();
+		 Airport takeoff = example.getTakeoff();
+		 String takeoffIata = null;
+		 if (takeoff != null)
+			 takeoffIata = takeoff.getIata();
+		 LocalDateTime takeoffTime = example.getTakeoffTime();
+		 
+		 Specification<Flight> spec = Specification.where(null);
+		 
+		 if (id > 0)
+			 spec = spec.and(FlightSpecifications.hasId(id));
+		 
+		 if(StringUtils.hasText(flightNumber))
+			 spec = spec.and(FlightSpecifications.hasFlightNumber(flightNumber));
+			 
+		 if(StringUtils.hasText(takeoffIata))
+			 spec = spec.and(FlightSpecifications.hasTakeoffIata(takeoffIata));
+		
+		 if (takeoffTime != null)
+			 spec = spec.and(FlightSpecifications.hasTakeoffTime(takeoffTime));
+		
+		
+		return flightRepository.findAll(spec, Sort.by("id"));
+	}
 }
