@@ -20,10 +20,12 @@ public interface CompanyMapper {
 	@IterableMapping(qualifiedByName = "summary")
 	List<CompanyDto> companiesToSummaryDtos(List<Company> company);
 
+	@Mapping(source = "legalForm.form", target = "legalForm")
 	@Mapping(target = "employees", ignore = true)
 	@Named("summary")
 	CompanyDto companyToSummaryDto(Company company);
 
+	@Mapping(source = "legalForm.form", target = "legalForm")
 	CompanyDto companyToDto(Company company);
 
 	@Mapping(target = "legalForm", ignore = true)
@@ -31,6 +33,8 @@ public interface CompanyMapper {
 
 	@Mapping(source = "company.name", target = "companyName")
 	@Mapping(source = "position.name", target = "title")
+//	@Mapping(target = "companyName", ignore = true)
+//	@Mapping(target = "title", ignore = true)
 	EmployeeDto employeeToDto(Employee employee);
 	
 	

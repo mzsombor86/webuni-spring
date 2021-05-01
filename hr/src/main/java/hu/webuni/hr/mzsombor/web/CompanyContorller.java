@@ -55,11 +55,12 @@ public class CompanyContorller {
 	// adataival együtt.
 	@GetMapping
 	public List<CompanyDto> getAllCompanies(@RequestParam(required = false) String full) {
-		List<Company> allCompanies = companyService.findAll();
+		List<Company> allCompanies = companyService.getAllCompanies(full);
 		if (full == null || full.equals("false")) {
 			return companyMapper.companiesToSummaryDtos(allCompanies);
-		} else
+		} else {
 			return companyMapper.companiesToDtos(allCompanies);
+		}
 	}
 
 	// Azon cégek kilistázása, melyek egy bizonyos fizetés feletti alkalmazottat
@@ -68,7 +69,7 @@ public class CompanyContorller {
 	@GetMapping(params = "aboveSalary")
 	public List<CompanyDto> getCompaniesAboveASalary(@RequestParam int aboveSalary,
 			@RequestParam(required = false) String full) {
-		List<Company> allCompanies = companyRepository.findWhereEmployeeSalaryIsGreaterThan(aboveSalary);
+		List<Company> allCompanies = companyService.findWhereEmployeeSalaryIsGreaterThan(aboveSalary);
 		if (full == null || full.equals("false")) {
 			return companyMapper.companiesToSummaryDtos(allCompanies);
 		} else
@@ -79,9 +80,9 @@ public class CompanyContorller {
 	// alkalmaznak.
 	// Full paraméter megléte esetén az alkalmazottak adataival együtt.
 	@GetMapping(params = "aboveEmployeeNumber")
-	public List<CompanyDto> getCompaniesAboveEmployeeNumber(@RequestParam Long aboveEmployeeNumber,
+	public List<CompanyDto> getCompaniesAboveEmployeeNumber(@RequestParam int aboveEmployeeNumber,
 			@RequestParam(required = false) String full) {
-		List<Company> filteredCompanies = companyRepository.findWhereEmployeeNumberIsAbove(aboveEmployeeNumber);
+		List<Company> filteredCompanies = companyService.findWhereEmployeeNumberIsAbove(aboveEmployeeNumber);
 		if (full == null || full.equals("false")) {
 			return companyMapper.companiesToSummaryDtos(filteredCompanies);
 		} else
@@ -92,13 +93,17 @@ public class CompanyContorller {
 	// adataival együtt.
 	@GetMapping("/{id}")
 	public CompanyDto getCompanyById(@PathVariable long id, @RequestParam(required = false) String full) {
-		Company company = companyService.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		Company company = null;
 		CompanyDto companyDto = null;
-		if (full == null || full.equals("false"))
+		if (full == null || full.equals("false")) {
+			company = companyService.findById(id)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 			companyDto = companyMapper.companyToSummaryDto(company);
-		else
+		} else {
+			company = companyService.findByIdFull(id)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 			companyDto = companyMapper.companyToDto(company);
+		}
 		return companyDto;
 	}
 
@@ -108,8 +113,11 @@ public class CompanyContorller {
 	public List<AvgSalaryDto> getAverageSalariesByTitleAtACompany(@PathVariable long id,
 			@RequestParam boolean avgSalaryByTitle) {
 		if (avgSalaryByTitle) {
-			companyService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-			return companyRepository.listAverageSalaryiesGroupedByTitlesAtACompany(id);
+			try {
+				return companyService.listAverageSalaryiesGroupedByTitlesAtACompany(id);
+			} catch(NoSuchElementException e) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			}
 		}
 		return null;
 	}
@@ -118,59 +126,30 @@ public class CompanyContorller {
 	@PostMapping
 	public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
 		Company company = companyMapper.dtoToCompany(companyDto);
-		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm().getForm())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY)));
-		return companyMapper.companyToDto(companyService.save(company));
+		try {
+			return companyMapper.companyToDto(companyService.addNewCompany(company, companyDto.getLegalForm() ));
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY);
+		}
 	}
 
 	// Egy adott cég módosítása
 	@PutMapping("/{registrationNumber}")
-	public ResponseEntity<CompanyDto> modifyCompany(@PathVariable long registrationNumber,
+	public CompanyDto modifyCompany(@PathVariable long registrationNumber,
 			@RequestBody CompanyDto companyDto) {
 		companyDto.setRegistrationNumber(registrationNumber);
 		Company company = companyMapper.dtoToCompany(companyDto);
-		company.setLegalForm(legalFormService.findByForm(companyDto.getLegalForm().getForm())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY)));
-		Company updatedCompany = companyService.update(company);
-		if (updatedCompany == null)
-			return ResponseEntity.notFound().build();
-		return ResponseEntity.ok(companyMapper.companyToDto(companyService.save(updatedCompany)));
+		try {
+			return companyMapper.companyToDto(companyService.updateCompany(company, companyDto.getLegalForm() ));
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY);
+		}
 	}
 
 	// Adott cég törlése
 	@DeleteMapping("/{registrationNumber}")
 	public void deleteCompany(@PathVariable long registrationNumber) {
 		companyService.delete(registrationNumber);
-	}
-
-	// Alkalmazott hozzáadása egy céghez
-	@PostMapping("/{registrationNumber}/employee")
-	public CompanyDto addEmployeeToACompany(@PathVariable long registrationNumber,
-			@RequestBody EmployeeDto employeeDto) {
-		try {
-			Employee employee = employeeMapper.dtoToEmployee(employeeDto);
-			positionService
-					.findByNameAndCompany(employeeDto.getTitle(), companyService.findById(registrationNumber).get())
-					.get().addEmployee(employee);
-			return companyMapper.companyToDto(companyService.addEmployee(registrationNumber, employee));
-		} catch (NoSuchElementException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-	}
-
-	// Egy cég alkalmazottainak módosítása
-	@PutMapping("/{registrationNumber}/employee")
-	public CompanyDto modifyEmployeesOfACompany(@PathVariable long registrationNumber,
-			@RequestBody List<EmployeeDto> employeeDtos) {
-		try {
-			companyService.deleteEmployeesOfACompany(registrationNumber);
-			for (EmployeeDto employeeDto : employeeDtos) {
-				addEmployeeToACompany(registrationNumber, employeeDto);
-			}
-			return companyMapper.companyToDto(companyService.findById(registrationNumber).get());
-		} catch (NoSuchElementException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
 	}
 
 	// Egy cég egy bizonyos alkalmazottjának törlése
@@ -182,5 +161,35 @@ public class CompanyContorller {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 	}
+
+	// Alkalmazott hozzáadása egy céghez
+	@PostMapping("/{registrationNumber}/employee")
+	public CompanyDto addEmployeeToACompany(@PathVariable long registrationNumber,
+			@RequestBody EmployeeDto employeeDto) {
+		try {
+			Employee employee = employeeMapper.dtoToEmployee(employeeDto);
+			return companyMapper.companyToDto(companyService.addEmployee(registrationNumber, employeeDto.getTitle(), employee));
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	
+	// Egy cég alkalmazottainak módosítása
+	@PutMapping("/{registrationNumber}/employee")
+	public CompanyDto modifyEmployeesOfACompany(@PathVariable long registrationNumber,
+			@RequestBody List<EmployeeDto> employeeDtos) {
+		try {						
+			companyService.deleteEmployeesOfACompany(registrationNumber);
+			for (EmployeeDto employeeDto : employeeDtos) {
+				addEmployeeToACompany(registrationNumber, employeeDto);
+			}
+			return companyMapper.companyToDto(companyService.findById(registrationNumber).get());
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	
 
 }

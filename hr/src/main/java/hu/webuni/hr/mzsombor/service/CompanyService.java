@@ -1,14 +1,17 @@
 package hu.webuni.hr.mzsombor.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import hu.webuni.hr.mzsombor.dto.AvgSalaryDto;
 import hu.webuni.hr.mzsombor.model.Company;
 import hu.webuni.hr.mzsombor.model.Employee;
+import hu.webuni.hr.mzsombor.model.Position;
 import hu.webuni.hr.mzsombor.repository.CompanyRepository;
 import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
 
@@ -20,13 +23,27 @@ public class CompanyService {
 
 	@Autowired
 	EmployeeRepository employeeRepository;
+	
+	@Autowired
+	LegalFormService legalFormService;
+	
+	@Autowired
+	PositionService positionService;
 
 	public List<Company> findAll() {
 		return companyRepository.findAll();
 	}
 
+	public List<Company> findAllWithEmployees() {
+		return companyRepository.findAllWithEmployees();
+	}
+
 	public Optional<Company> findById(long id) {
 		return companyRepository.findById(id);
+	}
+	
+	public Optional<Company> findByIdFull(long id) {
+		return companyRepository.findByWithEmployees(id);
 	}
 	
 	public Optional<Company> findByName(String name) {
@@ -34,8 +51,10 @@ public class CompanyService {
 	}
 
 	@Transactional
-	public Company addEmployee(Long id, Employee employee) {
+	public Company addEmployee(Long id, String title, Employee employee) {
 		Company company = companyRepository.findById(id).get();
+		Position position = positionService.findByNameAndCompany(title, company).get();
+		position.addEmployee(employee);
 		company.addEmployee(employee);
 		employeeRepository.save(employee);
 		return company;
@@ -78,5 +97,45 @@ public class CompanyService {
 	public void delete(long id) {
 		companyRepository.deleteById(id);
 	}
+
+	public List<Company> getAllCompanies(String full) {
+		if (full == null || full.equals("false")) {
+			return findAll();
+		} else {
+			return findAllWithEmployees();
+		}
+	}
+
+	public List<Company> findWhereEmployeeSalaryIsGreaterThan(int aboveSalary) {
+		return companyRepository.findWhereEmployeeSalaryIsGreaterThan(aboveSalary);
+	}
+
+	public List<Company> findWhereEmployeeNumberIsAbove(int aboveEmployeeNumber) {
+		return companyRepository.findWhereEmployeeNumberIsAbove(aboveEmployeeNumber);
+	}
+
+	public List<AvgSalaryDto> listAverageSalaryiesGroupedByTitlesAtACompany(long id) {
+		findById(id).orElseThrow(() -> new NoSuchElementException());
+		return companyRepository.listAverageSalaryiesGroupedByTitlesAtACompany(id);
+	}
+	
+	@Transactional
+	public Company addNewCompany(Company company, String legalForm) {
+		company.setLegalForm(legalFormService.findByForm(legalForm)
+				.orElseThrow(() -> new NoSuchElementException()));
+		company.setRegistrationNumber(null);
+		return companyRepository.save(company);
+	}
+
+	@Transactional
+	public Company updateCompany(Company company, String legalForm) {
+		company.setLegalForm(legalFormService.findByForm(legalForm)
+				.orElseThrow(() -> new NoSuchElementException()));
+		Company updatedCompany = update(company);
+		if (updatedCompany == null)
+			throw new NoSuchElementException();
+		return updatedCompany;
+	}
+	
 
 }

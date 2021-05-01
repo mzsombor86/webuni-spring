@@ -19,6 +19,7 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+    open-in-view: false
   datasource:
     url: jdbc:postgresql://localhost:5432/webuni
     username: postgres

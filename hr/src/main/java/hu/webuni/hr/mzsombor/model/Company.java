@@ -7,13 +7,31 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 
+
+
+@NamedEntityGraph(
+		name = "companyWithEmployeesAndEmployeePositions",
+		attributeNodes = {
+				@NamedAttributeNode("legalForm"),
+				@NamedAttributeNode( value = "employees", subgraph = "employeesGraph")
+		},
+		subgraphs = {
+				@NamedSubgraph(
+						name = "employeesGraph",
+						attributeNodes = {
+								@NamedAttributeNode("position")
+						})
+		})
 @Entity
 public class Company {
 	@Id
 	@GeneratedValue
-	private long registrationNumber;
+	private Long registrationNumber;
 	private String name;
 	private String address;
 
@@ -30,7 +48,7 @@ public class Company {
 
 	}
 
-	public Company(long registrationNumber, String name, String address, LegalForm legalForm, List<Position> positions,
+	public Company(Long registrationNumber, String name, String address, LegalForm legalForm, List<Position> positions,
 			List<Employee> employees) {
 		this.registrationNumber = registrationNumber;
 		this.name = name;
@@ -40,11 +58,11 @@ public class Company {
 		this.employees = employees;
 	}
 
-	public long getRegistrationNumber() {
+	public Long getRegistrationNumber() {
 		return registrationNumber;
 	}
 
-	public void setRegistrationNumber(long registrationNumber) {
+	public void setRegistrationNumber(Long registrationNumber) {
 		this.registrationNumber = registrationNumber;
 	}
 

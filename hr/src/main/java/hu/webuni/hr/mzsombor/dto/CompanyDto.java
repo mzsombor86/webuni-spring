@@ -6,14 +6,14 @@ public class CompanyDto {
 	private long registrationNumber;
 	private String name;
 	private String address;
-	private LegalFormDto legalForm;
+	private String legalForm;
 	private List<EmployeeDto> employees;
 	
 	public CompanyDto() {
 		
 	}
 	
-	public CompanyDto(long registrationNumber, String name, String address, LegalFormDto legalForm,
+	public CompanyDto(long registrationNumber, String name, String address, String legalForm,
 			List<EmployeeDto> employees) {
 		this.registrationNumber = registrationNumber;
 		this.name = name;
@@ -39,10 +39,10 @@ public class CompanyDto {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	public LegalFormDto getLegalForm() {
+	public String getLegalForm() {
 		return legalForm;
 	}
-	public void setLegalForm(LegalFormDto legalForm) {
+	public void setLegalForm(String legalForm) {
 		this.legalForm = legalForm;
 	}
 	public List<EmployeeDto> getEmployees() {

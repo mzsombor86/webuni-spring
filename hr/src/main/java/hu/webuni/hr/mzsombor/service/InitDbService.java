@@ -53,15 +53,15 @@ public class InitDbService {
 		legalFormRepository.save(new LegalForm(4, "kft"));
 
 		List<Company> companies = new ArrayList<>();
-		companies.add(new Company(1, "JavaWorks", "1111 Budapest, Java Street 1.",
+		companies.add(new Company(1L, "JavaWorks", "1111 Budapest, Java Street 1.",
 				legalFormRepository.findByForm("nyrt").get(), null, null));
-		companies.add(new Company(2, "SpringWorks", "2222 Budapest, Spring Street 1.",
+		companies.add(new Company(2L, "SpringWorks", "2222 Budapest, Spring Street 1.",
 				legalFormRepository.findByForm("zrt").get(), null, null));
-		companies.add(new Company(3, "HtmlWorks", "3333 Budapest, Html Street 1.",
+		companies.add(new Company(3L, "HtmlWorks", "3333 Budapest, Html Street 1.",
 				legalFormRepository.findByForm("kft").get(), null, null));
-		companies.add(new Company(4, "CSSWorks", "4444 Budapest, CSS Street 1.",
+		companies.add(new Company(4L, "CSSWorks", "4444 Budapest, CSS Street 1.",
 				legalFormRepository.findByForm("bt").get(), null, null));
-		companies.add(new Company(5, "NodeJSWorks", "5555 Budapest, NodeJS Street 1.",
+		companies.add(new Company(5L, "NodeJSWorks", "5555 Budapest, NodeJS Street 1.",
 				legalFormRepository.findByForm("nyrt").get(), null, null));
 
 		int i = 0;
@@ -100,7 +100,7 @@ public class InitDbService {
 
 			for (Employee employee : employees) {
 				Employee newEmployee = positionService.addEmployee(employee.getPosition().getId(), employee);
-				companyService.addEmployee(newCompany.getRegistrationNumber(), newEmployee);
+				companyService.addEmployee(newCompany.getRegistrationNumber(), newEmployee.getPosition().getName(), newEmployee);
 			}
 		}
 
