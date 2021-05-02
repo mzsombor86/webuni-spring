@@ -85,7 +85,11 @@
 							<artifactId>mapstruct-processor</artifactId>
 							<version>${org.mapstruct.version}</version>
 						</path>
-						<!-- other annotation processors -->
+						<path>
+							<groupId>org.hibernate</groupId>
+							<artifactId>hibernate-jpamodelgen</artifactId>
+							<version>5.3.20.Final</version>
+						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>

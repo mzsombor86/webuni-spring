@@ -1,4 +1,4 @@
- package hu.webuni.hr.mzsombor.web;
+package hu.webuni.hr.mzsombor.web;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +27,6 @@ import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.model.Employee;
 import hu.webuni.hr.mzsombor.service.EmployeeService;
-import hu.webuni.hr.mzsombor.service.PositionService;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -35,9 +34,6 @@ public class EmployeeController {
 
 	@Autowired
 	EmployeeService employeeService;
-	
-	@Autowired
-	PositionService positionService;
 
 	@Autowired
 	EmployeeMapper employeeMapper;
@@ -60,25 +56,27 @@ public class EmployeeController {
 	// Egy új alkalmazott hozzáadása
 	@PostMapping
 	public EmployeeDto createEmployee(@RequestBody @Valid EmployeeDto employeeDto) {
-		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
+		Employee employee = employeeService.addEmployee(employeeMapper.dtoToEmployee(employeeDto),employeeDto.getCompanyName(), employeeDto.getTitle());
 		return employeeMapper.employeeToDto(employee);
 	}
 
 	// Létező alkalmazott módosítása
 	@PutMapping("/{id}")
-	public ResponseEntity<EmployeeDto> modifyEmployee(@PathVariable long id,
+	public EmployeeDto modifyEmployee(@PathVariable long id,
 			@RequestBody @Valid EmployeeDto employeeDto) {
-		if (employeeService.findById(id) == null)
-			return ResponseEntity.notFound().build();
 		employeeDto.setId(id);
-		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
-		return ResponseEntity.ok(employeeMapper.employeeToDto(employee));
+		Employee employee = employeeService.updateEmployee(employeeMapper.dtoToEmployee(employeeDto));
+		return employeeMapper.employeeToDto(employee);
 	}
 
 	// Alkamlmazott törlése
 	@DeleteMapping("/{id}")
 	public void deleteEmployee(@PathVariable long id) {
-		employeeService.delete(id);
+		try {
+			employeeService.delete(id);
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
 	}
 
 	// Bizonyos fizetés fölötti alkalmazottak kilistázása
@@ -86,14 +84,15 @@ public class EmployeeController {
 	public List<EmployeeDto> getAboveASalary(@RequestParam int aboveSalary) {
 		return employeeMapper.employeesToDtos(employeeService.findAboveASalary(aboveSalary));
 	}
-	
+
 	// Bizonyos fizetés fölötti alkalmazottak kilistázása lapozhatóan
-		@GetMapping(params = {"aboveSalaryPageable","pageSize","pageNumber"})
-		public List<EmployeeDto> getAboveASalaryPageable(@RequestParam int aboveSalaryPageable, @RequestParam int pageSize, @RequestParam int pageNumber) {
-			Pageable page = PageRequest.of(pageNumber, pageSize);
-			Page<Employee> employeePage = employeeService.findAboveASalary(aboveSalaryPageable, page);
-			return employeePage.map(employeeMapper::employeeToDto).toList();
-		}
+	@GetMapping(params = { "aboveSalaryPageable", "pageSize", "pageNumber" })
+	public List<EmployeeDto> getAboveASalaryPageable(@RequestParam int aboveSalaryPageable, @RequestParam int pageSize,
+			@RequestParam int pageNumber) {
+		Pageable page = PageRequest.of(pageNumber, pageSize);
+		Page<Employee> employeePage = employeeService.findAboveASalary(aboveSalaryPageable, page);
+		return employeePage.map(employeeMapper::employeeToDto).toList();
+	}
 
 	// Beküldött alkalmazott fizetésemelésének mértékének meghatározása.
 	@PostMapping("/getraisepercentage")
@@ -120,10 +119,10 @@ public class EmployeeController {
 	}
 
 	// Bizonyos belépési dátumok között belépett alkalmazottak kilistázása
-	@GetMapping(params = {"startDate","endDate"})
-	public List<EmployeeDto> getByEntryDate(@RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) {
+	@GetMapping(params = { "startDate", "endDate" })
+	public List<EmployeeDto> getByEntryDate(@RequestParam LocalDateTime startDate,
+			@RequestParam LocalDateTime endDate) {
 		return employeeMapper.employeesToDtos(employeeService.findByEntryDate(startDate, endDate));
 	}
-	
 
 }

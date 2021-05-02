@@ -1,6 +1,7 @@
 package hu.webuni.hr.mzsombor.web;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,34 +22,42 @@ import hu.webuni.hr.mzsombor.service.LegalFormService;
 @RestController
 @RequestMapping("/api/legalforms")
 public class LegalFormController {
-	
+
 	@Autowired
 	LegalFormService legalFormService;
-	
+
 	@Autowired
 	LegalFormMapper legalFormMapper;
-	
+
 	@GetMapping
 	List<LegalFormDto> getLegalForms() {
 		return legalFormMapper.legalFormsToLegalFormDtos(legalFormService.findAll());
 	}
-	
+
 	@PostMapping
 	LegalFormDto addLegalForm(@RequestBody LegalFormDto legalFormDto) {
-		return legalFormMapper.legalFormToLegalFormDto(legalFormService.save(legalFormMapper.legalFormDTOToLegalForm(legalFormDto)));
+		return legalFormMapper
+				.legalFormToLegalFormDto(legalFormService.save(legalFormMapper.legalFormDTOToLegalForm(legalFormDto)));
 	}
-	
+
 	@PutMapping("/{id}")
-	LegalFormDto changeLegalForm(@RequestBody LegalFormDto legalFormDto, @PathVariable long id ) {
-		legalFormService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+	LegalFormDto changeLegalForm(@RequestBody LegalFormDto legalFormDto, @PathVariable long id) {
 		legalFormDto.setId(id);
-		return legalFormMapper.legalFormToLegalFormDto(legalFormService.save(legalFormMapper.legalFormDTOToLegalForm(legalFormDto)));
+		try {
+			return legalFormMapper.legalFormToLegalFormDto(
+					legalFormService.updateLegalForm(legalFormMapper.legalFormDTOToLegalForm(legalFormDto)));
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
 	}
-	
+
 	@DeleteMapping("{/id}")
 	void deleteLegalForm(@PathVariable long id) {
-		legalFormService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		legalFormService.delete(id);
+		try {
+			legalFormService.delete(id);
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
 	}
 
 }

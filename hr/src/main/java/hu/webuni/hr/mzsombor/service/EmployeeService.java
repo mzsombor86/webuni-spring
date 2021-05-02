@@ -3,13 +3,17 @@ package hu.webuni.hr.mzsombor.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import hu.webuni.hr.mzsombor.model.Company;
 import hu.webuni.hr.mzsombor.model.Employee;
 import hu.webuni.hr.mzsombor.model.Position;
 import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
@@ -21,6 +25,9 @@ public abstract class EmployeeService {
 	
 	@Autowired
 	PositionService positionService;
+	
+	@Autowired
+	CompanyService companyService;
 
 	public abstract int getPayRaisePercent(Employee employee);
 
@@ -64,15 +71,27 @@ public abstract class EmployeeService {
 	}
 	
 	@Transactional
-	public Employee update(Employee employee) {
+	public Employee addEmployee(Employee employee, String companyName, String positionName) {
+		Company company = companyService.findByName(companyName).get();
+		company.addEmployee(employee);
+		employee.setCompany(company);
+		Position position = positionService.findByNameAndCompany(positionName, company).get();
+		position.addEmployee(employee);
+		employee.setPosition(position);
+		return employeeRepository.save(employee);
+	}
+	
+	@Transactional
+	public Employee updateEmployee(Employee employee) {
 		if (!employeeRepository.existsById(employee.getId()))
-			return null;
+			throw new NoSuchElementException();
 		return employeeRepository.save(employee);
 	}
 	
 
 	@Transactional
 	public void delete(long id) {
+		employeeRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		employeeRepository.deleteById(id);
 	}
 

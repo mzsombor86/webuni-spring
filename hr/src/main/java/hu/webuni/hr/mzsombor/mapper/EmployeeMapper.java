@@ -6,7 +6,6 @@ import javax.validation.Valid;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.data.domain.Page;
 
 import hu.webuni.hr.mzsombor.dto.EmployeeDto;
 import hu.webuni.hr.mzsombor.model.Employee;
@@ -23,6 +22,7 @@ public interface EmployeeMapper {
 	@Mapping(source="company.name", target="companyName")
 	EmployeeDto employeeToDto(Employee employee);
 
+	@Mapping(source = "title", target = "position.name")
 	Employee dtoToEmployee(@Valid EmployeeDto employeeDto);
 
 	List<Employee> dtosToEmployees(List<EmployeeDto> employeeDtos);

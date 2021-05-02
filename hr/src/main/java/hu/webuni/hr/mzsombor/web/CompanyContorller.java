@@ -5,7 +5,6 @@ import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,10 +23,7 @@ import hu.webuni.hr.mzsombor.mapper.CompanyMapper;
 import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.model.Company;
 import hu.webuni.hr.mzsombor.model.Employee;
-import hu.webuni.hr.mzsombor.repository.CompanyRepository;
 import hu.webuni.hr.mzsombor.service.CompanyService;
-import hu.webuni.hr.mzsombor.service.LegalFormService;
-import hu.webuni.hr.mzsombor.service.PositionService;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -35,15 +31,6 @@ public class CompanyContorller {
 
 	@Autowired
 	CompanyService companyService;
-
-	@Autowired
-	CompanyRepository companyRepository;
-
-	@Autowired
-	LegalFormService legalFormService;
-
-	@Autowired
-	PositionService positionService;
 
 	@Autowired
 	CompanyMapper companyMapper;
@@ -96,8 +83,7 @@ public class CompanyContorller {
 		Company company = null;
 		CompanyDto companyDto = null;
 		if (full == null || full.equals("false")) {
-			company = companyService.findById(id)
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+			company = companyService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 			companyDto = companyMapper.companyToSummaryDto(company);
 		} else {
 			company = companyService.findByIdFull(id)
@@ -115,7 +101,7 @@ public class CompanyContorller {
 		if (avgSalaryByTitle) {
 			try {
 				return companyService.listAverageSalaryiesGroupedByTitlesAtACompany(id);
-			} catch(NoSuchElementException e) {
+			} catch (NoSuchElementException e) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 			}
 		}
@@ -127,7 +113,7 @@ public class CompanyContorller {
 	public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
 		Company company = companyMapper.dtoToCompany(companyDto);
 		try {
-			return companyMapper.companyToDto(companyService.addNewCompany(company, companyDto.getLegalForm() ));
+			return companyMapper.companyToDto(companyService.addNewCompany(company, companyDto.getLegalForm()));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY);
 		}
@@ -135,12 +121,11 @@ public class CompanyContorller {
 
 	// Egy adott cég módosítása
 	@PutMapping("/{registrationNumber}")
-	public CompanyDto modifyCompany(@PathVariable long registrationNumber,
-			@RequestBody CompanyDto companyDto) {
+	public CompanyDto modifyCompany(@PathVariable long registrationNumber, @RequestBody CompanyDto companyDto) {
 		companyDto.setRegistrationNumber(registrationNumber);
 		Company company = companyMapper.dtoToCompany(companyDto);
 		try {
-			return companyMapper.companyToDto(companyService.updateCompany(company, companyDto.getLegalForm() ));
+			return companyMapper.companyToDto(companyService.updateCompany(company, companyDto.getLegalForm()));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY);
 		}
@@ -168,28 +153,22 @@ public class CompanyContorller {
 			@RequestBody EmployeeDto employeeDto) {
 		try {
 			Employee employee = employeeMapper.dtoToEmployee(employeeDto);
-			return companyMapper.companyToDto(companyService.addEmployee(registrationNumber, employeeDto.getTitle(), employee));
+			return companyMapper
+					.companyToDto(companyService.addEmployee(registrationNumber, employeeDto.getTitle(), employee));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 	}
 
-	
 	// Egy cég alkalmazottainak módosítása
 	@PutMapping("/{registrationNumber}/employee")
 	public CompanyDto modifyEmployeesOfACompany(@PathVariable long registrationNumber,
 			@RequestBody List<EmployeeDto> employeeDtos) {
-		try {						
-			companyService.deleteEmployeesOfACompany(registrationNumber);
-			for (EmployeeDto employeeDto : employeeDtos) {
-				addEmployeeToACompany(registrationNumber, employeeDto);
-			}
-			return companyMapper.companyToDto(companyService.findById(registrationNumber).get());
+		try {
+			return companyMapper.companyToDto(companyService.replaceEmployees(employeeMapper.dtosToEmployees(employeeDtos),registrationNumber));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 	}
-
-	
 
 }

@@ -1,6 +1,7 @@
 package hu.webuni.hr.mzsombor.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,19 @@ public class LegalFormService {
 	}
 	
 	@Transactional
+	public LegalForm updateLegalForm(LegalForm legalForm) {
+		findById(legalForm.getId()).orElseThrow(() -> new NoSuchElementException());
+		return save(legalForm);
+	}
+	
+	@Transactional
 	public LegalForm save(LegalForm legalForm) {
 		return legalFormRepository.save(legalForm);
 	}
 	
 	@Transactional
 	public void delete(long id) {
+		findById(id).orElseThrow(() -> new NoSuchElementException());
 		legalFormRepository.deleteById(id);
 	}
 

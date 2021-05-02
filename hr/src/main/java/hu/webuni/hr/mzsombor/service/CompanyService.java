@@ -23,10 +23,10 @@ public class CompanyService {
 
 	@Autowired
 	EmployeeRepository employeeRepository;
-	
+
 	@Autowired
 	LegalFormService legalFormService;
-	
+
 	@Autowired
 	PositionService positionService;
 
@@ -41,11 +41,11 @@ public class CompanyService {
 	public Optional<Company> findById(long id) {
 		return companyRepository.findById(id);
 	}
-	
+
 	public Optional<Company> findByIdFull(long id) {
 		return companyRepository.findByWithEmployees(id);
 	}
-	
+
 	public Optional<Company> findByName(String name) {
 		return companyRepository.findByName(name);
 	}
@@ -60,18 +60,17 @@ public class CompanyService {
 		return company;
 	}
 
-
 	@Transactional
-	public Company deleteEmployee(long id, long employeeId) {
-		Company company = companyRepository.findById(id).get();
-		Employee employee = employeeRepository.findById(employeeId).get();
-		employee.setCompany(null);
-		company.getEmployees().remove(employee);
-		employeeRepository.save(employee);
-		return company;
+	public Company replaceEmployees(List<Employee> employees, long registrationNumber) {
+		deleteEmployeesOfACompany(registrationNumber);
+		for (Employee employee : employees) {
+			String title = employee.getPosition().getName();
+			employee.setPosition(null);
+			addEmployee(registrationNumber, title, employee);
+		}
+		return findById(registrationNumber).get();
 	}
-	
-	
+
 	@Transactional
 	public Company deleteEmployeesOfACompany(long id) {
 		Company company = companyRepository.findById(id).get();
@@ -80,6 +79,15 @@ public class CompanyService {
 		return company;
 	}
 
+	@Transactional
+	public Company deleteEmployee(long id, long employeeId) {
+		Company company = companyRepository.findById(id).get();
+		Employee employee = employeeRepository.findById(employeeId).get();
+		employee.setCompany(null);
+		company.getEmployees().remove(employee);
+		//employeeRepository.save(employee);
+		return company;
+	}
 
 	@Transactional
 	public Company save(Company company) {
@@ -118,24 +126,21 @@ public class CompanyService {
 		findById(id).orElseThrow(() -> new NoSuchElementException());
 		return companyRepository.listAverageSalaryiesGroupedByTitlesAtACompany(id);
 	}
-	
+
 	@Transactional
 	public Company addNewCompany(Company company, String legalForm) {
-		company.setLegalForm(legalFormService.findByForm(legalForm)
-				.orElseThrow(() -> new NoSuchElementException()));
+		company.setLegalForm(legalFormService.findByForm(legalForm).orElseThrow(() -> new NoSuchElementException()));
 		company.setRegistrationNumber(null);
 		return companyRepository.save(company);
 	}
 
 	@Transactional
 	public Company updateCompany(Company company, String legalForm) {
-		company.setLegalForm(legalFormService.findByForm(legalForm)
-				.orElseThrow(() -> new NoSuchElementException()));
+		company.setLegalForm(legalFormService.findByForm(legalForm).orElseThrow(() -> new NoSuchElementException()));
 		Company updatedCompany = update(company);
 		if (updatedCompany == null)
 			throw new NoSuchElementException();
 		return updatedCompany;
 	}
-	
 
 }
