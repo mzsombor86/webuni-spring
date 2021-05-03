@@ -124,5 +124,11 @@ public class EmployeeController {
 			@RequestParam LocalDateTime endDate) {
 		return employeeMapper.employeesToDtos(employeeService.findByEntryDate(startDate, endDate));
 	}
+	
+	//Alkalmazottak keresése minta alapján
+	@GetMapping("/search")
+	public List<EmployeeDto> findByExample(@RequestBody EmployeeDto example) {
+		return employeeMapper.employeesToDtos(employeeService.findEmployeesByExample(employeeMapper.dtoToEmployee(example)));
+	}
 
 }

@@ -52,12 +52,12 @@ public class CompanyService {
 
 	@Transactional
 	public Company addEmployee(Long id, String title, Employee employee) {
-		Company company = companyRepository.findById(id).get();
+		Company company = companyRepository.findByWithEmployees(id).get();
 		Position position = positionService.findByNameAndCompany(title, company).get();
 		position.addEmployee(employee);
 		company.addEmployee(employee);
 		employeeRepository.save(employee);
-		return company;
+		return companyRepository.findByWithEmployees(id).get();
 	}
 
 	@Transactional
