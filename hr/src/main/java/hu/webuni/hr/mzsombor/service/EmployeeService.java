@@ -111,7 +111,7 @@ public abstract class EmployeeService {
 		employee.setCompany(company);
 		Position position = positionService.findByNameAndCompany(positionName, company).get();
 		position.addEmployee(employee);
-		employee.setPosition(position);
+		//employee.setPosition(position);
 		return employeeRepository.save(employee);
 	}
 

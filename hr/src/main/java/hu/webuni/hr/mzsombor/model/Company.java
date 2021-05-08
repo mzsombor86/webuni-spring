@@ -113,7 +113,7 @@ public class Company {
 		employee.setCompany(this);
 	}
 	
-	public void addosition(Position position) {
+	public void addPosition(Position position) {
 		if (this.positions == null)
 			this.positions = new ArrayList<>();
 		this.positions.add(position);

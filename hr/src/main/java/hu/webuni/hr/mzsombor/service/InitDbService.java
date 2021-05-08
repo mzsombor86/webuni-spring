@@ -13,6 +13,7 @@ import hu.webuni.hr.mzsombor.model.LegalForm;
 import hu.webuni.hr.mzsombor.model.Position;
 import hu.webuni.hr.mzsombor.repository.CompanyRepository;
 import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
+import hu.webuni.hr.mzsombor.repository.LeaveRepository;
 import hu.webuni.hr.mzsombor.repository.LegalFormRepository;
 import hu.webuni.hr.mzsombor.repository.PositionRepository;
 
@@ -30,6 +31,9 @@ public class InitDbService {
 	
 	@Autowired
 	PositionRepository positionRepository;
+	
+	@Autowired
+	LeaveRepository leaveRepository;
 
 	@Autowired
 	CompanyService companyService;
@@ -38,6 +42,7 @@ public class InitDbService {
 	PositionService positionService;
 
 	public void clearDB() {
+		leaveRepository.deleteAll();
 		employeeRepository.deleteAll();
 		positionRepository.deleteAll();
 		companyRepository.deleteAll();

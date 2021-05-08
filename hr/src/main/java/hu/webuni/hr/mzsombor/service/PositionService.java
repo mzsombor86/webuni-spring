@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import javax.persistence.EntityExistsException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -56,21 +58,32 @@ public class PositionService {
 	public Position save(Position position) {
 		return positionRepository.save(position);
 	}
-	
+
 	@Transactional
 	public Position addPosition(Position position, String companyName) {
 		if (companyName != null)
 			position.setCompany(companyService.findByName(companyName).orElseThrow(() -> new NoSuchElementException()));
+		if (findByNameAndCompany(position.getName(), position.getCompany()).isPresent())
+			throw new EntityExistsException();
 		return save(position);
-		
+
 	}
 
 	@Transactional
-	public Position updatePosition(Position position) {
-		Position oldPosition = findById(position.getId()).get();
-		position.setCompany(oldPosition.getCompany());
-		position.setEmployees(oldPosition.getEmployees());
-		return positionRepository.save(position);
+	public Position updatePosition(Position position, String companyName) {
+		if (companyName != null)
+			position.setCompany(companyService.findByName(companyName).orElseThrow(() -> new NoSuchElementException()));
+		Optional<Position> anotherPositionWithTheSameDetails = findByNameAndCompany(position.getName(),
+				position.getCompany());
+		Position positionInDB = findById(position.getId()).get();
+		if (anotherPositionWithTheSameDetails.isPresent()
+				&& anotherPositionWithTheSameDetails.get().getId() != positionInDB.getId())
+			throw new EntityExistsException();
+		positionInDB.setCompany(position.getCompany());
+		positionInDB.setMinDegree(position.getMinDegree());
+		positionInDB.setMinSalary(position.getMinSalary());
+		positionInDB.setName(position.getName());
+		return positionInDB;
 	}
 
 	@Transactional

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import javax.persistence.EntityExistsException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,6 +65,8 @@ public class PositionController {
 		Position position = positionMapper.dtoToPosition(positionDto);
 		try {
 			return positionMapper.positionToDto(positionService.addPosition(position, positionDto.getCompany()));
+		} catch (EntityExistsException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
@@ -73,7 +77,9 @@ public class PositionController {
 		positionDto.setId(id);
 		Position position = positionMapper.dtoToPosition(positionDto);
 		try {
-			return positionMapper.positionToDto(positionService.updatePosition(position));
+			return positionMapper.positionToDto(positionService.updatePosition(position, positionDto.getCompany()));
+		} catch (EntityExistsException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}

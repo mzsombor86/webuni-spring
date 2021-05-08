@@ -33,8 +33,6 @@ public interface CompanyMapper {
 
 	@Mapping(source = "company.name", target = "companyName")
 	@Mapping(source = "position.name", target = "title")
-//	@Mapping(target = "companyName", ignore = true)
-//	@Mapping(target = "title", ignore = true)
 	EmployeeDto employeeToDto(Employee employee);
 	
 	

@@ -13,6 +13,7 @@ import hu.webuni.hr.mzsombor.model.Position;
 public interface PositionMapper {
 	
 	@Mapping(source = "company.name", target="company")
+	@Mapping(target = "employees", ignore = true)
 	PositionDto positionToDto(Position position);
 	
 	List<PositionDto> positionsToDtos(List<Position> positions);
