@@ -23,8 +23,8 @@ public class HrApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		initDbService.clearDB();
-		initDbService.insertTestData();
+		//initDbService.clearDB();
+		//initDbService.insertTestData();
 	}
 
 }

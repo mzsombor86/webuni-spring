@@ -54,7 +54,7 @@ public class LeaveController {
 		return leaveMapper.leaveToDto(leave);
 	}
 
-	@GetMapping(value = "/search")
+	@PostMapping(value = "/search")
 	public List<LeaveDto> findByExample(@RequestBody LeaveExampleDto example, 
 			@RequestParam(defaultValue = "0") Integer pageNo, 
             @RequestParam(defaultValue = "10") Integer pageSize,
