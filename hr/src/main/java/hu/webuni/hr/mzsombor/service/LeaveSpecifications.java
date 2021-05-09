@@ -33,15 +33,6 @@ public class LeaveSpecifications {
 				(approvalName + "%").toLowerCase());
 	}
 
-	public static Specification<Leave> leaveStartIsBetween(LocalDateTime startOfLeave,
-			LocalDateTime endOfLeave) {
-		return (root, cq, cb) -> cb.between(root.get(Leave_.startOfLeave), startOfLeave, endOfLeave);
-	}
-
-	public static Specification<Leave> leaveEndIsBetween(LocalDateTime startOfLeave, LocalDateTime endOfLeave) {
-		return (root, cq, cb) -> cb.between(root.get(Leave_.endOfLeave), startOfLeave, endOfLeave);
-	}
-
 	public static Specification<Leave> leaveStartIsLessThan(LocalDateTime startOfLeave) {
 		return (root, cq, cb) -> cb.lessThan(root.get(Leave_.startOfLeave), startOfLeave);
 	}
