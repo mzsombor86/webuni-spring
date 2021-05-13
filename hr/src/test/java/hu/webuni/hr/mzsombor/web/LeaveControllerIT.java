@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import hu.webuni.hr.mzsombor.dto.CompanyDto;
@@ -29,6 +30,7 @@ import hu.webuni.hr.mzsombor.repository.PositionRepository;
 
 @AutoConfigureTestDatabase
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class LeaveControllerIT {
 
 	//Before running integration tests, you have to switch off the two initDB calling in HrApplication.java run method!

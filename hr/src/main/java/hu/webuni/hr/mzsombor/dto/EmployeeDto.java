@@ -9,9 +9,17 @@ import javax.validation.constraints.Past;
 public class EmployeeDto {
 	private long id;
 	@NotEmpty
+	private String username;
+	@NotEmpty
+	private String password;
+	
+	@NotEmpty
 	private String name;
 	@NotEmpty
 	private String title;
+	
+	private Long superiorId;
+	
 	@Min(value = 1)
 	private int salary;
 	@Past
@@ -22,10 +30,25 @@ public class EmployeeDto {
 
 	}
 
-	public EmployeeDto(long id, String name, String title, int salary, LocalDateTime entryDate, String companyName) {
+	public EmployeeDto(long id, String username, String password, String name, String title, Long superiorId, int salary, LocalDateTime entryDate, String companyName) {
 		this.id = id;
+		this.username = username;
+		this.password = password;
 		this.name = name;
 		this.title = title;
+		this.superiorId = superiorId;
+		this.salary = salary;
+		this.entryDate = entryDate;
+		this.companyName = companyName;
+	}
+	
+	public EmployeeDto(long id, String name, String title, int salary, LocalDateTime entryDate, String companyName) {
+		this.id = id;
+		this.username = null;
+		this.password = null;
+		this.name = name;
+		this.title = title;
+		this.superiorId = null;
 		this.salary = salary;
 		this.entryDate = entryDate;
 		this.companyName = companyName;
@@ -77,6 +100,32 @@ public class EmployeeDto {
 
 	public void setEntryDate(LocalDateTime entryDate) {
 		this.entryDate = entryDate;
+	}
+	
+	
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public Long getSuperiorId() {
+		return superiorId;
+	}
+
+	public void setSuperiorId(Long superiorId) {
+		this.superiorId = superiorId;
 	}
 
 	@Override

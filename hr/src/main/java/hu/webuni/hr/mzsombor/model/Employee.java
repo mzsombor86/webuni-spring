@@ -9,22 +9,39 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Past;
+
+@NamedEntityGraph(
+		name="employeeWithLeaves", 
+		attributeNodes= {
+			@NamedAttributeNode("leaves")
+		})
 
 @Entity
 public class Employee {
 	@Id
 	@GeneratedValue
 	private long id;
+
+	private String username;
+	private String password;
+	
 	@NotEmpty
 	private String name;
+	
 	
 	@ManyToOne
 	@JoinColumn(name="position_id")
 	private Position position;
+	
+	@ManyToOne
+	@JoinColumn(name="superior_id")
+	private Employee superior;
 	
 	@Min(value = 1)
 	private int salary;
@@ -42,10 +59,13 @@ public class Employee {
 
 	}
 
-	public Employee(long id, String name, Position position, int salary, LocalDateTime entryDate, Company company) {
+	public Employee(long id, String username, String password, String name, Position position, Employee superior, int salary, LocalDateTime entryDate, Company company) {
 		this.id = id;
+		this.username = username;
+		this.password = password;
 		this.name = name;
 		this.position = position;
+		this.superior = superior;
 		this.salary = salary;
 		this.entryDate = entryDate;
 		this.company = company;
@@ -108,6 +128,32 @@ public class Employee {
 		this.leaves = leaves;
 	}
 	
+	
+	
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public Employee getSuperior() {
+		return superior;
+	}
+
+	public void setSuperior(Employee superior) {
+		this.superior = superior;
+	}
+
 	public void addLeave(Leave leave) {
 		if (this.leaves == null)
 			this.leaves = new ArrayList<>();

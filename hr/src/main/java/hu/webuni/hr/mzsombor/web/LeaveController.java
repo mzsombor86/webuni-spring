@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import hu.webuni.hr.mzsombor.dto.LeaveExampleDto;
 import hu.webuni.hr.mzsombor.mapper.EmployeeMapper;
 import hu.webuni.hr.mzsombor.mapper.LeaveMapper;
 import hu.webuni.hr.mzsombor.model.Leave;
+import hu.webuni.hr.mzsombor.service.EmployeeService;
 import hu.webuni.hr.mzsombor.service.LeaveService;
 
 @RestController
@@ -42,6 +44,9 @@ public class LeaveController {
 
 	@Autowired
 	LeaveMapper leaveMapper;
+	
+	@Autowired 
+	EmployeeService employeeService;
 
 	@GetMapping
 	public List<LeaveDto> getAll() {
@@ -68,7 +73,8 @@ public class LeaveController {
 	public LeaveDto addLeave(@RequestBody @Valid LeaveDto newLeave) {
 		Leave leave;
 		try {
-			leave = leaveService.addLeave(leaveMapper.dtoToLeave(newLeave), newLeave.getEmployeeId());
+//			leave = leaveService.addLeave(leaveMapper.dtoToLeave(newLeave), newLeave.getEmployeeId());
+			leave = leaveService.addLeave(leaveMapper.dtoToLeave(newLeave), newLeave.getEmployeeId(), employeeService.findById(newLeave.getEmployeeId()).get().getUsername());
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
@@ -80,7 +86,11 @@ public class LeaveController {
 		modifiedLeave.setEmployeeId(id);
 		Leave leave;
 		try {
-			leave = leaveService.modifyLeave(id, leaveMapper.dtoToLeave(modifiedLeave));
+//			leave = leaveService.modifyLeave(id, leaveMapper.dtoToLeave(modifiedLeave));
+			leave = leaveService.modifyLeave(
+					id, 
+					leaveMapper.dtoToLeave(modifiedLeave), 
+					leaveService.findById(id).get().getEmployee().getUsername());
 		} catch (InvalidParameterException e) {
 			throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
 		} catch (NoSuchElementException e) {
@@ -93,7 +103,8 @@ public class LeaveController {
 	@DeleteMapping("/{id}")
 	public void deleteLeave(@PathVariable long id) {
 		try {
-			leaveService.deleteLeave(id);
+//			leaveService.deleteLeave(id);
+			leaveService.deleteLeave(id, leaveService.findById(id).get().getEmployee().getUsername());
 		} catch (InvalidParameterException e) {
 			throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
 		} catch (NoSuchElementException e) {
@@ -105,9 +116,13 @@ public class LeaveController {
 	public LeaveDto approveLeave(@PathVariable long id, @RequestParam long approvalId, @RequestParam boolean status) {
 		Leave leave;
 		try {
-			leave = leaveService.approveLeave(id, approvalId, status);
+//			leave = leaveService.approveLeave(id, approvalId, status);
+			leave = leaveService.approveLeave(id, approvalId, status,
+					employeeService.findById(approvalId).get().getUsername());
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		} catch (AccessDeniedException e) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 		}
 		return leaveMapper.leaveToDto(leave);
 	}

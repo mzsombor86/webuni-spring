@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import hu.webuni.hr.mzsombor.model.Company;
 import hu.webuni.hr.mzsombor.model.Employee;
@@ -40,6 +42,10 @@ public class InitDbService {
 	
 	@Autowired
 	PositionService positionService;
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
 
 	public void clearDB() {
 		leaveRepository.deleteAll();
@@ -50,24 +56,25 @@ public class InitDbService {
 		
 	}
 
+	@Transactional
 	public void insertTestData() {
 
 		legalFormRepository.save(new LegalForm(1, "nyrt"));
-		legalFormRepository.save(new LegalForm(2, "zrt"));
-		legalFormRepository.save(new LegalForm(3, "bt"));
-		legalFormRepository.save(new LegalForm(4, "kft"));
+//		legalFormRepository.save(new LegalForm(2, "zrt"));
+//		legalFormRepository.save(new LegalForm(3, "bt"));
+//		legalFormRepository.save(new LegalForm(4, "kft"));
 
 		List<Company> companies = new ArrayList<>();
 		companies.add(new Company(1L, "JavaWorks", "1111 Budapest, Java Street 1.",
 				legalFormRepository.findByForm("nyrt").get(), null, null));
-		companies.add(new Company(2L, "SpringWorks", "2222 Budapest, Spring Street 1.",
-				legalFormRepository.findByForm("zrt").get(), null, null));
-		companies.add(new Company(3L, "HtmlWorks", "3333 Budapest, Html Street 1.",
-				legalFormRepository.findByForm("kft").get(), null, null));
-		companies.add(new Company(4L, "CSSWorks", "4444 Budapest, CSS Street 1.",
-				legalFormRepository.findByForm("bt").get(), null, null));
-		companies.add(new Company(5L, "NodeJSWorks", "5555 Budapest, NodeJS Street 1.",
-				legalFormRepository.findByForm("nyrt").get(), null, null));
+//		companies.add(new Company(2L, "SpringWorks", "2222 Budapest, Spring Street 1.",
+//				legalFormRepository.findByForm("zrt").get(), null, null));
+//		companies.add(new Company(3L, "HtmlWorks", "3333 Budapest, Html Street 1.",
+//				legalFormRepository.findByForm("kft").get(), null, null));
+//		companies.add(new Company(4L, "CSSWorks", "4444 Budapest, CSS Street 1.",
+//				legalFormRepository.findByForm("bt").get(), null, null));
+//		companies.add(new Company(5L, "NodeJSWorks", "5555 Budapest, NodeJS Street 1.",
+//				legalFormRepository.findByForm("nyrt").get(), null, null));
 
 		int i = 0;
 
@@ -87,26 +94,31 @@ public class InitDbService {
 			
 			
 			List<Employee> employees = new ArrayList<>();
-			employees.add(new Employee(1, "Sam Mendes", positionService.findByNameAndCompany("CEO", newCompany).get(), 1_000_000 + i,
+			employees.add(new Employee(1, "sam", passwordEncoder.encode("pass"), "Sam Mendes", positionService.findByNameAndCompany("CEO", newCompany).get(), null, 1_000_000 + i,
 					LocalDateTime.parse("1980-03-01T10:00:00"), null));
-			employees.add(new Employee(2, "John Smith", positionService.findByNameAndCompany("CTO", newCompany).get(), 500_000 + i, LocalDateTime.parse("1990-03-01T10:00:00"),
+			employees.add(new Employee(2, "john", passwordEncoder.encode("pass"),  "John Smith", positionService.findByNameAndCompany("CTO", newCompany).get(), null, 500_000 + i, LocalDateTime.parse("1990-03-01T10:00:00"),
 					null));
-			employees.add(new Employee(3, "Angela Davidson", positionService.findByNameAndCompany("CXO", newCompany).get(), 500_000 + i,
+			employees.add(new Employee(3, "angela", passwordEncoder.encode("pass"), "Angela Davidson", positionService.findByNameAndCompany("CXO", newCompany).get(), null, 500_000 + i,
 					LocalDateTime.parse("2000-03-01T10:00:00"), null));
-			employees.add(new Employee(4, "Peter Knee", positionService.findByNameAndCompany("developer", newCompany).get(), 300_000 + i,
+			employees.add(new Employee(4, "peter", passwordEncoder.encode("pass"), "Peter Knee", positionService.findByNameAndCompany("developer", newCompany).get(), null, 300_000 + i,
 					LocalDateTime.parse("2010-03-01T10:00:00"), null));
-			employees.add(new Employee(5, "Anthony Spacy", positionService.findByNameAndCompany("administrative", newCompany).get(), 200_000 + i,
+			employees.add(new Employee(5, "anthony", passwordEncoder.encode("pass"), "Anthony Spacy", positionService.findByNameAndCompany("administrative", newCompany).get(), null, 200_000 + i,
 					LocalDateTime.parse("2015-03-01T10:00:00"), null));
-			employees.add(new Employee(6, "Richard Pearce", positionService.findByNameAndCompany("associate", newCompany).get(), 200_000 + i,
+			employees.add(new Employee(6, "richard", passwordEncoder.encode("pass"), "Richard Pearce", positionService.findByNameAndCompany("associate", newCompany).get(), null, 200_000 + i,
 					LocalDateTime.parse("2018-09-01T10:00:00"), null));
-			employees.add(new Employee(7, "Megan Baker", positionService.findByNameAndCompany("trainee", newCompany).get(), 100_000 + i,
+			employees.add(new Employee(7, "megan", passwordEncoder.encode("pass"), "Megan Baker", positionService.findByNameAndCompany("trainee", newCompany).get(), null, 100_000 + i,
 					LocalDateTime.parse("2020-09-01T10:00:00"), null));
 			i += 50_000;
 
 			for (Employee employee : employees) {
 				Employee newEmployee = positionService.addEmployee(employee.getPosition().getId(), employee);
 				companyService.addEmployee(newCompany.getRegistrationNumber(), newEmployee.getPosition().getName(), newEmployee);
+				newEmployee.setSuperior(employeeRepository.findByUsername("sam").get(0));
 			}
+			
+			employeeRepository.findByUsername("sam").get(0).setSuperior(null);
+			
+			
 		}
 
 	}

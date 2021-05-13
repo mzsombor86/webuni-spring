@@ -15,15 +15,21 @@ public interface EmployeeMapper {
 
 	@Mapping(source="position.name", target="title")
 	@Mapping(source="company.name", target="companyName")
+	@Mapping(source="superior.id", target="superiorId")
+	@Mapping(target="password", ignore = true)
 	List<EmployeeDto> employeesToDtos(List<Employee> employees);
 	
 
 	@Mapping(source="position.name", target="title")
 	@Mapping(source="company.name", target="companyName")
+	@Mapping(source="superior.id", target="superiorId")
+	@Mapping(target="password", ignore = true)
 	EmployeeDto employeeToDto(Employee employee);
 
 	@Mapping(source = "title", target = "position.name")
 	@Mapping(source = "companyName", target = "company.name")
+	@Mapping(source = "superiorId", target= "superior.id")
+	@Mapping(target="password", ignore = true)
 	Employee dtoToEmployee(@Valid EmployeeDto employeeDto);
 
 	List<Employee> dtosToEmployees(List<EmployeeDto> employeeDtos);

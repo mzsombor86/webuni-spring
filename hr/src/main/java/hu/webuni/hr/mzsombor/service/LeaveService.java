@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -16,6 +18,7 @@ import org.springframework.util.StringUtils;
 import hu.webuni.hr.mzsombor.dto.LeaveExampleDto;
 import hu.webuni.hr.mzsombor.model.Employee;
 import hu.webuni.hr.mzsombor.model.Leave;
+import hu.webuni.hr.mzsombor.repository.EmployeeRepository;
 import hu.webuni.hr.mzsombor.repository.LeaveRepository;
 
 @Service
@@ -65,24 +68,43 @@ public class LeaveService {
 	}
 
 	@Transactional
-	public Leave addLeave(Leave leave, long employeeId) {
+	@PreAuthorize("#username == authentication.name")
+	public Leave addLeave(Leave leave, long employeeId, String username) {
 		Employee employee = employeeService.findById(employeeId).get();
 		employee.addLeave(leave);
 		leave.setCreateDateTime(LocalDateTime.now());
+		
 		return leaveRepository.save(leave);
 	}
+	
+	
+//	public Leave addLeave(Leave leave, long employeeId) {
+//		String username = employeeService.findById(employeeId).get().getUsername();
+//		return addLeave(leave, employeeId, username);
+//	}
 
 	@Transactional
-	public Leave approveLeave(long id, long approvalId, boolean status) {
+	@PreAuthorize("#approvalUsername == authentication.name")
+	public Leave approveLeave(long id, long approvalId, boolean status, String approvalUsername) {
 		Leave leave = leaveRepository.findById(id).get();
+		if (leave.getEmployee().getSuperior().getId() != approvalId)
+			throw new AccessDeniedException("");
 		leave.setApprover(employeeService.findById(approvalId).get());
 		leave.setApproved(status);
 		leave.setApproveDateTime(LocalDateTime.now());
 		return leave;
 	}
+	
+//	public Leave approveLeave(long id, long approvalId, boolean status) {
+//		String approvalUsername = employeeService.findById(approvalId).get().getUsername();
+//		return approveLeave(id, approvalId, status, approvalUsername);
+//	}
+	
+	
 
 	@Transactional
-	public Leave modifyLeave(long id, Leave newLeave) {
+	@PreAuthorize("#username == authentication.name")
+	public Leave modifyLeave(long id, Leave newLeave, String username) {
 		Leave leave = leaveRepository.findById(id).get();
 		if (leave.getApproved() != null)
 			throw new InvalidParameterException();
@@ -91,14 +113,27 @@ public class LeaveService {
 		leave.setCreateDateTime(LocalDateTime.now());
 		return leave;
 	}
+	
+//	public Leave modifyLeave(long id, Leave newLeave) {
+//		String username = leaveRepository.findById(id).get().getEmployee().getUsername();
+//		return modifyLeave(id,newLeave, username);
+//	}
 
 	@Transactional
-	public void deleteLeave(long id) {
+	@PreAuthorize("#username == authentication.name")
+	public void deleteLeave(long id, String username) {
 		Leave leave = leaveRepository.findById(id).get();
 		if (leave.getApproved() != null)
 			throw new InvalidParameterException();
-		leave.getEmployee().getLeaves().remove(leave);
+		long employeeId = leave.getEmployee().getId();
+		employeeService.findById(employeeId).get().getLeaves().remove(leave);
 		leaveRepository.deleteById(id);
 	}
+	
+//	public void deleteLeave(long id) {
+//		String username = leaveRepository.findById(id).get().getEmployee().getUsername();
+//		deleteLeave(id, username);
+//	}
+	
 
 }

@@ -7,8 +7,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class HrConfigProperties {
 
+	
+	
 	private Raise raise = new Raise();
 
+	private boolean test;
+	
 	public static class Raise {
 
 		private Default def = new Default();
@@ -74,5 +78,15 @@ public class HrConfigProperties {
 	public void setRaise(Raise raise) {
 		this.raise = raise;
 	}
+
+	public boolean isTest() {
+		return test;
+	}
+
+	public void setTest(boolean test) {
+		this.test = test;
+	}
+	
+	
 
 }
