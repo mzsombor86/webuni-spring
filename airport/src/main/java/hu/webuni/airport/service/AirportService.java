@@ -25,7 +25,7 @@ public class AirportService {
 
 	@Autowired
 	FlightRepository flightRepository;
-	
+
 	@Autowired
 	LogEntryService logEntryService;
 
@@ -35,12 +35,13 @@ public class AirportService {
 //		em.persist(airport);
 		return airportRepository.save(airport);
 	}
-	
+
 	@Transactional
 	public Airport update(Airport airport) {
 		checkUniqueIata(airport.getIata(), airport.getId());
 		if (airportRepository.existsById(airport.getId())) {
-			logEntryService.createLog(String.format("Airport modified with id: %d new name is %s", airport.getId(), airport.getName()));
+			logEntryService.createLog(
+					String.format("Airport modified with id: %d new name is %s", airport.getId(), airport.getName()));
 			return airportRepository.save(airport);
 		} else
 			throw new NoSuchElementException();
@@ -88,31 +89,30 @@ public class AirportService {
 		flight.setTakeoffTime(takeoffDateTime);
 		return flightRepository.save(flight);
 	}
-	
+
 	public List<Flight> findFlightsByExapmle(Flight example) {
-		 long id = example.getId();
-		 String flightNumber = example.getFlightNumber();
-		 Airport takeoff = example.getTakeoff();
-		 String takeoffIata = null;
-		 if (takeoff != null)
-			 takeoffIata = takeoff.getIata();
-		 LocalDateTime takeoffTime = example.getTakeoffTime();
-		 
-		 Specification<Flight> spec = Specification.where(null);
-		 
-		 if (id > 0)
-			 spec = spec.and(FlightSpecifications.hasId(id));
-		 
-		 if(StringUtils.hasText(flightNumber))
-			 spec = spec.and(FlightSpecifications.hasFlightNumber(flightNumber));
-			 
-		 if(StringUtils.hasText(takeoffIata))
-			 spec = spec.and(FlightSpecifications.hasTakeoffIata(takeoffIata));
-		
-		 if (takeoffTime != null)
-			 spec = spec.and(FlightSpecifications.hasTakeoffTime(takeoffTime));
-		
-		
+		long id = example.getId();
+		String flightNumber = example.getFlightNumber();
+		Airport takeoff = example.getTakeoff();
+		String takeoffIata = null;
+		if (takeoff != null)
+			takeoffIata = takeoff.getIata();
+		LocalDateTime takeoffTime = example.getTakeoffTime();
+
+		Specification<Flight> spec = Specification.where(null);
+
+		if (id > 0)
+			spec = spec.and(FlightSpecifications.hasId(id));
+
+		if (StringUtils.hasText(flightNumber))
+			spec = spec.and(FlightSpecifications.hasFlightNumber(flightNumber));
+
+		if (StringUtils.hasText(takeoffIata))
+			spec = spec.and(FlightSpecifications.hasTakeoffIata(takeoffIata));
+
+		if (takeoffTime != null)
+			spec = spec.and(FlightSpecifications.hasTakeoffTime(takeoffTime));
+
 		return flightRepository.findAll(spec, Sort.by("id"));
 	}
 }

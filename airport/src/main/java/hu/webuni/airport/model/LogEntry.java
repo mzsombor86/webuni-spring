@@ -15,13 +15,15 @@ public class LogEntry {
 
 	private LocalDateTime ts;
 	private String description;
+	private String username;
 
 	public LogEntry() {
 	}
 
-	public LogEntry(String description) {
+	public LogEntry(String description, String username) {
 		this.ts = LocalDateTime.now();
 		this.description = description;
+		this.username = username;
 	}
 
 	public long getId() {
@@ -47,5 +49,15 @@ public class LogEntry {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	
 
 }
