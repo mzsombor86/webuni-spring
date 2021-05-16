@@ -154,7 +154,7 @@ public class CompanyContorller {
 		try {
 			Employee employee = employeeMapper.dtoToEmployee(employeeDto);
 			return companyMapper
-					.companyToDto(companyService.addEmployee(registrationNumber, employeeDto.getTitle(), employee));
+					.companyToDto(companyService.addEmployee(registrationNumber, employeeDto.getTitle(), employeeDto.getSuperiorId(), employee));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}

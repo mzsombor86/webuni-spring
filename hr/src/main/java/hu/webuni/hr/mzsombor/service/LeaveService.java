@@ -68,8 +68,8 @@ public class LeaveService {
 	}
 
 	@Transactional
-	@PreAuthorize("#username == authentication.name")
-	public Leave addLeave(Leave leave, long employeeId, String username) {
+	@PreAuthorize("#employeeId == authentication.principal.employeeId")
+	public Leave addLeave(Leave leave, long employeeId) {
 		Employee employee = employeeService.findById(employeeId).get();
 		employee.addLeave(leave);
 		leave.setCreateDateTime(LocalDateTime.now());
@@ -84,8 +84,8 @@ public class LeaveService {
 //	}
 
 	@Transactional
-	@PreAuthorize("#approvalUsername == authentication.name")
-	public Leave approveLeave(long id, long approvalId, boolean status, String approvalUsername) {
+	@PreAuthorize("#approvalId == authentication.principal.employeeId")
+	public Leave approveLeave(long id, long approvalId, boolean status) {
 		Leave leave = leaveRepository.findById(id).get();
 		if (leave.getEmployee().getSuperior().getId() != approvalId)
 			throw new AccessDeniedException("");
@@ -103,8 +103,8 @@ public class LeaveService {
 	
 
 	@Transactional
-	@PreAuthorize("#username == authentication.name")
-	public Leave modifyLeave(long id, Leave newLeave, String username) {
+	@PreAuthorize("#employeeId == authentication.principal.employeeId")
+	public Leave modifyLeave(long id, Leave newLeave, long employeeId) {
 		Leave leave = leaveRepository.findById(id).get();
 		if (leave.getApproved() != null)
 			throw new InvalidParameterException();
@@ -120,12 +120,11 @@ public class LeaveService {
 //	}
 
 	@Transactional
-	@PreAuthorize("#username == authentication.name")
-	public void deleteLeave(long id, String username) {
+	@PreAuthorize("#employeeId == authentication.principal.employeeId")
+	public void deleteLeave(long id, long employeeId) {
 		Leave leave = leaveRepository.findById(id).get();
 		if (leave.getApproved() != null)
 			throw new InvalidParameterException();
-		long employeeId = leave.getEmployee().getId();
 		employeeService.findById(employeeId).get().getLeaves().remove(leave);
 		leaveRepository.deleteById(id);
 	}

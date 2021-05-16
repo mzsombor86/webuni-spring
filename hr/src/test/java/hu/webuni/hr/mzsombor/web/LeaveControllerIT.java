@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -38,6 +39,11 @@ public class LeaveControllerIT {
 	
 	private static final String BASE_URI = "/api";
 	private static final String LEAVES_BASE_URI = "/api/leaves";
+	
+	private static final String BOSS = "boss";
+	private static final String ASS = "ass";
+	private static final String PASS = "pass";
+	
 
 	@Autowired
 	WebTestClient webTestClient;
@@ -57,6 +63,9 @@ public class LeaveControllerIT {
 	@Autowired
 	LeaveRepository leaveRepository;
 	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+	
 	@BeforeEach
 	public void prepareDB() {
 		clearDB();
@@ -68,10 +77,11 @@ public class LeaveControllerIT {
 		createCompany(new CompanyDto(1, "JavaWorks", "1111 Budapest, Java street 1.", "zrt", null));
 		createPosition(new PositionDto(1, "CEO", "MSc", 1_000_000, "JavaWorks", null));
 		createPosition(new PositionDto(2, "assistant", "graduate", 100_000, "JavaWorks", null));
-		EmployeeDto newEmployee1 = new EmployeeDto(1, "Vezér Igazgató", "CEO", 1_000_000, LocalDateTime.now(), "JavaWorks");
-		EmployeeDto newEmployee2 = new EmployeeDto(2, "Asziszens Andi", "assistant", 200_000, LocalDateTime.now(), "JavaWorks");		
+		EmployeeDto newEmployee1 = new EmployeeDto(1, BOSS, passwordEncoder.encode(PASS), "Vezér Igazgató", "CEO", null, 1_000_000, LocalDateTime.now(), "JavaWorks");
+		EmployeeDto newEmployee2 = new EmployeeDto(2, ASS, passwordEncoder.encode(PASS), "Asziszens Andi", "assistant", null, 200_000, LocalDateTime.now(), "JavaWorks");		
 		long registrationNumber = companyRepository.findByName("JavaWorks").get().getRegistrationNumber();
 		addEmployee(newEmployee1, registrationNumber);
+		newEmployee2.setSuperiorId(employeeRepository.findByUsername(BOSS).get(0).getId());
 		addEmployee(newEmployee2, registrationNumber);
 		
 	}
@@ -129,29 +139,49 @@ public class LeaveControllerIT {
 	void testThatANewLeaveCanBeAdded() throws Exception {
 		List<Employee> employees = employeeRepository.findByNameStartingWithIgnoreCase("Vezér Igazgató");
 		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		addLeaveOk(newLeave);
-		List<LeaveDto> leaves = getAllLeaves();
+		addLeaveOk(newLeave, BOSS, PASS);
+		List<LeaveDto> leaves = getAllLeaves(BOSS, PASS);
 		assertThat(leaves.size()).isEqualTo(1);
 	}
 	
 	@Test
 	void testThatANewLeaveCannotBeAddedToANonExistingEmployee() throws Exception {
 		LeaveDto newLeave = new LeaveDto(1L, null, 10_000L, null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		addLeave404(newLeave);
-		List<LeaveDto> leaves = getAllLeaves();
+		addLeave403(newLeave, BOSS, PASS);
+		List<LeaveDto> leaves = getAllLeaves(BOSS, PASS);
 		assertThat(leaves.size()).isEqualTo(0);
 	}
 	
 	@Test
+	void testThatANewLeaveCannotBeAddedByAnUnauthorizedEmployee() throws Exception {
+		List<Employee> employees = employeeRepository.findByNameStartingWithIgnoreCase("Vezér Igazgató");
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		addLeave401(newLeave, "badUserName", PASS);
+		List<LeaveDto> leaves = getAllLeaves(BOSS, PASS);
+		assertThat(leaves.size()).isEqualTo(0);
+	}
+	
+	@Test
+	void testThatANewLeaveCannotBeAddedToAnotherEmployee() throws Exception {
+		List<Employee> employees = employeeRepository.findByNameStartingWithIgnoreCase("Vezér Igazgató");
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		addLeave403(newLeave, ASS, PASS);
+		List<LeaveDto> leaves = getAllLeaves(BOSS, PASS);
+		assertThat(leaves.size()).isEqualTo(0);
+	}
+	
+	
+	
+	@Test
 	void testThatALeaveCanBeApproved() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
-		long approverId = employees.get(1).getId();
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
+		long approverId = employees.get(0).getId();
 		
-		approveLeaveOk(leaveId, approverId, true);
+		approveLeaveOk(leaveId, approverId, true, BOSS, PASS);
 		
-		LeaveDto leave = getALeaveByIdOk(leaveId);
+		LeaveDto leave = getALeaveByIdOk(leaveId, ASS, PASS);
 		assertThat(leave.getApproved()).isEqualTo(true);
 		assertThat(leave.getApproverId()).isEqualTo(approverId);
 		assertThat(leave.getApproveDateTime()).isNotNull();
@@ -160,13 +190,13 @@ public class LeaveControllerIT {
 	@Test
 	void testThatAnInvalidLeaveCannotBeApproved() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
-		long approverId = employees.get(1).getId();
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
+		long approverId = employees.get(0).getId();
 		
-		approveLeave404(10_000L, approverId, true);
+		approveLeave404(10_000L, approverId, true, BOSS, PASS);
 		
-		LeaveDto leave = getALeaveByIdOk(leaveId);
+		LeaveDto leave = getALeaveByIdOk(leaveId, ASS, PASS);
 		assertThat(leave.getApproved()).isNull();
 		assertThat(leave.getApproverId()).isNull();
 		assertThat(leave.getApproveDateTime()).isNull();
@@ -175,12 +205,12 @@ public class LeaveControllerIT {
 	@Test
 	void testThatALeaveCannotBeApprovedByAnInvalidEmployee() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
 		
-		approveLeave404(leaveId, 10_000L, true);
+		approveLeave403(leaveId, 10_000L, true, BOSS, PASS);
 		
-		LeaveDto leave = getALeaveByIdOk(leaveId);
+		LeaveDto leave = getALeaveByIdOk(leaveId, ASS, PASS);
 		assertThat(leave.getApproved()).isNull();
 		assertThat(leave.getApproverId()).isNull();
 		assertThat(leave.getApproveDateTime()).isNull();
@@ -189,13 +219,13 @@ public class LeaveControllerIT {
 	@Test
 	void testThatANotApprovedLeaveCanBeModified() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
 		
-		LeaveDto modifiedLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2031, 5, 9, 10, 0), LocalDateTime.of(2031, 5, 10, 10, 0));
-		modifyLeaveOk(leaveId, modifiedLeave);
+		LeaveDto modifiedLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2031, 5, 9, 10, 0), LocalDateTime.of(2031, 5, 10, 10, 0));
+		modifyLeaveOk(leaveId, modifiedLeave, ASS, PASS);
 		
-		LeaveDto leaveAfterModification = getALeaveByIdOk(leaveId);
+		LeaveDto leaveAfterModification = getALeaveByIdOk(leaveId, ASS, PASS);
 		assertThat(leaveAfterModification.getStartOfLeave()).isEqualTo(modifiedLeave.getStartOfLeave());
 		assertThat(leaveAfterModification.getEndOfLeave()).isEqualTo(modifiedLeave.getEndOfLeave());
 		assertThat(leaveAfterModification.getEmployeeId()).isEqualTo(modifiedLeave.getEmployeeId());
@@ -204,89 +234,89 @@ public class LeaveControllerIT {
 	@Test
 	void testThatAnApprovedLeaveCannotBeModified() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
-		long approverId = employees.get(1).getId();
-		approveLeaveOk(leaveId, approverId, true);
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
+		long approverId = employees.get(0).getId();
+		approveLeaveOk(leaveId, approverId, true, BOSS, PASS);
 		
-		LeaveDto modifiedLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2031, 5, 9, 10, 0), LocalDateTime.of(2031, 5, 10, 10, 0));
+		LeaveDto modifiedLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2031, 5, 9, 10, 0), LocalDateTime.of(2031, 5, 10, 10, 0));
 		
-		modifyLeave405(leaveId, modifiedLeave);
+		modifyLeave405(leaveId, modifiedLeave, ASS, PASS);
 	}
 	
 	@Test
 	void testThatAnInvalidLeaveCannotBeModified() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
 		
-		LeaveDto modifiedLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2031, 5, 9, 10, 0), LocalDateTime.of(2031, 5, 10, 10, 0));
+		LeaveDto modifiedLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2031, 5, 9, 10, 0), LocalDateTime.of(2031, 5, 10, 10, 0));
 		
-		modifyLeave404(10_000L, modifiedLeave);
+		modifyLeave404(10_000L, modifiedLeave, ASS, PASS);
 	}
 	
 	@Test
 	void testThatANotApprovedLeaveCanBeDeleted() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
 		
-		deleteLeaveOk(leaveId);
+		deleteLeaveOk(leaveId, ASS, PASS);
 		
-		List<LeaveDto> leavesAfterModification = getAllLeaves();
+		List<LeaveDto> leavesAfterModification = getAllLeaves(ASS, PASS);
 		assertThat(leavesAfterModification.isEmpty()).isEqualTo(true);
 	}
 	
 	@Test
 	void testThatAnApprovedLeaveCannotBeDeleted() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long leaveId = addLeaveOk(newLeave).getId();
-		long approverId = employees.get(1).getId();
-		approveLeaveOk(leaveId, approverId, true);
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		long leaveId = addLeaveOk(newLeave, ASS, PASS).getId();
+		long approverId = employees.get(0).getId();
+		approveLeaveOk(leaveId, approverId, true, BOSS, PASS);
 				
-		deleteLeave405(leaveId);
+		deleteLeave405(leaveId, ASS, PASS);
 		
-		List<LeaveDto> leavesAfterModification = getAllLeaves();
+		List<LeaveDto> leavesAfterModification = getAllLeaves(ASS, PASS);
 		assertThat(leavesAfterModification.size()).isEqualTo(1);
 	}
 	
 	@Test
 	void testThatAnInvalidLeaveCannotBeDeleted() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		addLeaveOk(newLeave);
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		addLeaveOk(newLeave, ASS, PASS);
 		
-		deleteLeave404(10_000L);
+		deleteLeave404(10_000L, ASS, PASS);
 		
-		List<LeaveDto> leavesAfterModification = getAllLeaves();
+		List<LeaveDto> leavesAfterModification = getAllLeaves(ASS, PASS);
 		assertThat(leavesAfterModification.size()).isEqualTo(1);
 	}
 	
 	@Test
 	void testThatAnInvalidLeaveCannotBeFound() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
-		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		addLeaveOk(newLeave);
+		LeaveDto newLeave = new LeaveDto(1L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
+		addLeaveOk(newLeave, ASS, PASS);
 		
-		getALeaveById404(10_000L);
+		getALeaveById404(10_000L, ASS, PASS);
 	}
 	
 	@Test
 	void testThatAnEmptyExapmleGivesAllLeaves() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
 		LeaveDto newLeave1 = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long newLeave1Id = addLeaveOk(newLeave1).getId();
+		long newLeave1Id = addLeaveOk(newLeave1, BOSS, PASS).getId();
 		LeaveDto newLeave2 = new LeaveDto(2L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2023, 5, 9, 10, 0), LocalDateTime.of(2023, 5, 10, 10, 0));
-		long newLeave2Id = addLeaveOk(newLeave2).getId();
+		long newLeave2Id = addLeaveOk(newLeave2, BOSS, PASS).getId();
 		LeaveDto newLeave3 = new LeaveDto(3L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long newLeave3Id = addLeaveOk(newLeave3).getId();
+		long newLeave3Id = addLeaveOk(newLeave3, ASS, PASS).getId();
 		LeaveDto newLeave4 = new LeaveDto(4L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2023, 5, 9, 10, 0), LocalDateTime.of(2023, 5, 10, 10, 0));
-		long newLeave4Id = addLeaveOk(newLeave4).getId();
+		long newLeave4Id = addLeaveOk(newLeave4, ASS, PASS).getId();
 	
 		LeaveExampleDto example = new LeaveExampleDto(0, null, null, null, null, null, null, null);
 	
-		List<LeaveDto> result = getLeavesByExampleOk(example, 0, 100, "");
+		List<LeaveDto> result = getLeavesByExampleOk(example, 0, 100, "", ASS, PASS);
 		
 		assertThat(result.size()).isEqualTo(4);
 	}
@@ -295,17 +325,17 @@ public class LeaveControllerIT {
 	void testThatAnEmptyExapmleGivesAllLeavesWithPaging() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
 		LeaveDto newLeave1 = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long newLeave1Id = addLeaveOk(newLeave1).getId();
+		long newLeave1Id = addLeaveOk(newLeave1, BOSS, PASS).getId();
 		LeaveDto newLeave2 = new LeaveDto(2L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2023, 5, 9, 10, 0), LocalDateTime.of(2023, 5, 10, 10, 0));
-		long newLeave2Id = addLeaveOk(newLeave2).getId();
+		long newLeave2Id = addLeaveOk(newLeave2, BOSS, PASS).getId();
 		LeaveDto newLeave3 = new LeaveDto(3L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long newLeave3Id = addLeaveOk(newLeave3).getId();
+		long newLeave3Id = addLeaveOk(newLeave3, ASS, PASS).getId();
 		LeaveDto newLeave4 = new LeaveDto(4L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2023, 5, 9, 10, 0), LocalDateTime.of(2023, 5, 10, 10, 0));
-		long newLeave4Id = addLeaveOk(newLeave4).getId();
+		long newLeave4Id = addLeaveOk(newLeave4, ASS, PASS).getId();
 	
 		LeaveExampleDto example = new LeaveExampleDto(0, null, null, null, null, null, null, null);
 	
-		List<LeaveDto> result = getLeavesByExampleOk(example, 1, 3, "");
+		List<LeaveDto> result = getLeavesByExampleOk(example, 1, 3, "", ASS, PASS);
 		
 		assertThat(result.size()).isEqualTo(1);
 	}
@@ -314,28 +344,28 @@ public class LeaveControllerIT {
 	void testThatWeCanSearchByOverlappingTime() throws Exception {
 		List<Employee> employees = employeeRepository.findAll();
 		LeaveDto newLeave1 = new LeaveDto(1L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long newLeave1Id = addLeaveOk(newLeave1).getId();
+		long newLeave1Id = addLeaveOk(newLeave1, BOSS, PASS).getId();
 		LeaveDto newLeave2 = new LeaveDto(2L, null, employees.get(0).getId(), null, null, null, LocalDateTime.of(2023, 5, 9, 10, 0), LocalDateTime.of(2023, 5, 10, 10, 0));
-		long newLeave2Id = addLeaveOk(newLeave2).getId();
+		long newLeave2Id = addLeaveOk(newLeave2, BOSS, PASS).getId();
 		LeaveDto newLeave3 = new LeaveDto(3L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2021, 5, 9, 10, 0), LocalDateTime.of(2021, 5, 10, 10, 0));
-		long newLeave3Id = addLeaveOk(newLeave3).getId();
+		long newLeave3Id = addLeaveOk(newLeave3, ASS, PASS).getId();
 		LeaveDto newLeave4 = new LeaveDto(4L, null, employees.get(1).getId(), null, null, null, LocalDateTime.of(2023, 5, 9, 10, 0), LocalDateTime.of(2023, 5, 10, 10, 0));
-		long newLeave4Id = addLeaveOk(newLeave4).getId();
+		long newLeave4Id = addLeaveOk(newLeave4, ASS, PASS).getId();
 	
 		LeaveExampleDto example = new LeaveExampleDto(0, null, null, null, null, null, LocalDateTime.of(2020,1,1,10,0,0), LocalDateTime.of(2025,1,1,10,0,0));
-		List<LeaveDto> result = getLeavesByExampleOk(example, 0, 100, "");
+		List<LeaveDto> result = getLeavesByExampleOk(example, 0, 100, "", ASS, PASS);
 		assertThat(result.size()).isEqualTo(4);
 		
 		example = new LeaveExampleDto(0, null, null, null, null, null, LocalDateTime.of(2023,1,1,10,0,0), LocalDateTime.of(2025,1,1,10,0,0));
-		result = getLeavesByExampleOk(example, 0, 100, "");
+		result = getLeavesByExampleOk(example, 0, 100, "", ASS, PASS);
 		assertThat(result.size()).isEqualTo(2);
 		
 		example = new LeaveExampleDto(0, null, null, null, null, null, LocalDateTime.of(2024,1,1,10,0,0), LocalDateTime.of(2025,1,1,10,0,0));
-		result = getLeavesByExampleOk(example, 0, 100, "");
+		result = getLeavesByExampleOk(example, 0, 100, "", ASS, PASS);
 		assertThat(result.size()).isEqualTo(0);
 		
 		example = new LeaveExampleDto(0, null, null, null, null, null, LocalDateTime.of(2010,1,1,10,0,0), LocalDateTime.of(2012,1,1,10,0,0));
-		result = getLeavesByExampleOk(example, 0, 100, "");
+		result = getLeavesByExampleOk(example, 0, 100, "", ASS, PASS);
 		assertThat(result.size()).isEqualTo(0);	
 	}
 	
@@ -343,10 +373,11 @@ public class LeaveControllerIT {
 	
 	
 	
-	private List<LeaveDto> getAllLeaves() {
+	private List<LeaveDto> getAllLeaves(String username, String password) {
 		return webTestClient
 				.get()
 				.uri(LEAVES_BASE_URI)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isOk()
@@ -355,10 +386,11 @@ public class LeaveControllerIT {
 				.getResponseBody();
 	}
 	
-	private LeaveDto getALeaveByIdOk(long id) {
+	private LeaveDto getALeaveByIdOk(long id, String username, String password) {
 		return webTestClient
 				.get()
 				.uri(LEAVES_BASE_URI + "/" + id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isOk()
@@ -367,19 +399,21 @@ public class LeaveControllerIT {
 				.getResponseBody();
 	}
 	
-	private void getALeaveById404(long id) {
+	private void getALeaveById404(long id, String username, String password) {
 		webTestClient
 				.get()
 				.uri(LEAVES_BASE_URI + "/" + id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isNotFound();	
 	}
 	
-	private List<LeaveDto> getLeavesByExampleOk(LeaveExampleDto example, Integer pageNo, Integer pageSize, String sortBy) {
+	private List<LeaveDto> getLeavesByExampleOk(LeaveExampleDto example, Integer pageNo, Integer pageSize, String sortBy, String username, String password) {
 		return webTestClient
 				.post()
 				.uri(LEAVES_BASE_URI + "/search/?pageNo=" + pageNo + "&pageSize=" + pageSize + "&sortBy=" + sortBy)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.bodyValue(example)
 				.exchange()
 				.expectStatus()
@@ -389,10 +423,11 @@ public class LeaveControllerIT {
 				.getResponseBody();
 	}
 	
-	private LeaveDto addLeaveOk(LeaveDto leave) {
+	private LeaveDto addLeaveOk(LeaveDto leave, String username, String password) {
 		return webTestClient
 				.post()
 				.uri(LEAVES_BASE_URI)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.bodyValue(leave)
 				.exchange()
 				.expectStatus()
@@ -402,20 +437,33 @@ public class LeaveControllerIT {
 				.getResponseBody();
 	}
 	
-	private void addLeave404(LeaveDto leave) {
+	private void addLeave403(LeaveDto leave, String username, String password) {
 		webTestClient
 				.post()
 				.uri(LEAVES_BASE_URI)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.bodyValue(leave)
 				.exchange()
 				.expectStatus()
-				.isNotFound();
+				.isEqualTo(HttpStatus.FORBIDDEN);
 	}
 	
-	private LeaveDto modifyLeaveOk(long id, LeaveDto leave) {
+	private void addLeave401(LeaveDto leave, String username, String password) {
+		webTestClient
+				.post()
+				.uri(LEAVES_BASE_URI)
+				.headers(headers -> headers.setBasicAuth(username, password))
+				.bodyValue(leave)
+				.exchange()
+				.expectStatus()
+				.isEqualTo(HttpStatus.UNAUTHORIZED);
+	}
+	
+	private LeaveDto modifyLeaveOk(long id, LeaveDto leave, String username, String password) {
 		return webTestClient
 				.put()
 				.uri(LEAVES_BASE_URI + "/" +id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.bodyValue(leave)
 				.exchange()
 				.expectStatus()
@@ -425,57 +473,63 @@ public class LeaveControllerIT {
 				.getResponseBody();
 	}
 	
-	private void modifyLeave404(long id, LeaveDto leave) {
+	private void modifyLeave404(long id, LeaveDto leave, String username, String password) {
 		webTestClient
 				.put()
 				.uri(LEAVES_BASE_URI + "/" +id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.bodyValue(leave)
 				.exchange()
 				.expectStatus()
 				.isNotFound();
 	}
 	
-	private void modifyLeave405(long id, LeaveDto leave) {
+	private void modifyLeave405(long id, LeaveDto leave, String username, String password) {
 		webTestClient
 				.put()
 				.uri(LEAVES_BASE_URI + "/" +id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.bodyValue(leave)
 				.exchange()
 				.expectStatus()
 				.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
 	}
 	
-	private void deleteLeaveOk(long id) {
+	private void deleteLeaveOk(long id, String username, String password) {
 		webTestClient
 				.delete()
 				.uri(LEAVES_BASE_URI + "/" +id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isOk();
 	}
 	
-	private void deleteLeave404(long id) {
+	private void deleteLeave404(long id, String username, String password) {
 		webTestClient
 				.delete()
 				.uri(LEAVES_BASE_URI + "/" +id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isNotFound();
 	}
 	
-	private void deleteLeave405(long id) {
+	private void deleteLeave405(long id, String username, String password) {
 		webTestClient
 				.delete()
 				.uri(LEAVES_BASE_URI + "/" +id)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
 	}
 	
-	private LeaveDto approveLeaveOk(long id, long approvalId, boolean status) {
+	private LeaveDto approveLeaveOk(long id, long approvalId, boolean status, String username, String password) {
 		return webTestClient
 				.put()
 				.uri(LEAVES_BASE_URI + "/" + id + "/approval?status=" + status + "&approvalId=" + approvalId)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isOk()
@@ -484,14 +538,24 @@ public class LeaveControllerIT {
 				.getResponseBody();
 	}
 	
-	private void approveLeave404(long id, long approvalId, boolean status) {
+	private void approveLeave403(long id, long approvalId, boolean status, String username, String password) {
 		webTestClient
 				.put()
 				.uri(LEAVES_BASE_URI + "/" + id + "/approval?status=" + status + "&approvalId=" + approvalId)
+				.headers(headers -> headers.setBasicAuth(username, password))
+				.exchange()
+				.expectStatus()
+				.isEqualTo(HttpStatus.FORBIDDEN);
+	}
+	
+	private void approveLeave404(long id, long approvalId, boolean status, String username, String password) {
+		webTestClient
+				.put()
+				.uri(LEAVES_BASE_URI + "/" + id + "/approval?status=" + status + "&approvalId=" + approvalId)
+				.headers(headers -> headers.setBasicAuth(username, password))
 				.exchange()
 				.expectStatus()
 				.isNotFound();
 	}
-	
 	
 }

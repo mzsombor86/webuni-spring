@@ -16,6 +16,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import hu.webuni.hr.mzsombor.security.EmployeeUserDetailsService;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -63,8 +65,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
 		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-		daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+		daoAuthenticationProvider.setUserDetailsService(userDetailsService());
 		return daoAuthenticationProvider;
+	}
+	
+	@Bean 
+	public UserDetailsService userDetailsService() {
+		return new EmployeeUserDetailsService();
 	}
 	
 	

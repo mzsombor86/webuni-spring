@@ -51,9 +51,15 @@ public class CompanyService {
 	}
 
 	@Transactional
-	public Company addEmployee(Long id, String title, Employee employee) {
+	public Company addEmployee(Long id, String title, Long superiorId, Employee employee) {
 		Company company = companyRepository.findByWithEmployees(id).get();
 		Position position = positionService.findByNameAndCompany(title, company).get();
+		if (superiorId != null) {
+			Employee superior = employeeRepository.findById(superiorId).get();
+			employee.setSuperior(superior);
+		} else {
+			employee.setSuperior(null);
+		}
 		position.addEmployee(employee);
 		company.addEmployee(employee);
 		employeeRepository.save(employee);
@@ -66,7 +72,8 @@ public class CompanyService {
 		for (Employee employee : employees) {
 			String title = employee.getPosition().getName();
 			employee.setPosition(null);
-			addEmployee(registrationNumber, title, employee);
+			Long superiorId = employee.getSuperior().getId();
+			addEmployee(registrationNumber, title, superiorId, employee);
 		}
 		return findById(registrationNumber).get();
 	}

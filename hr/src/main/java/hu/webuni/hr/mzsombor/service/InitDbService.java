@@ -112,8 +112,7 @@ public class InitDbService {
 
 			for (Employee employee : employees) {
 				Employee newEmployee = positionService.addEmployee(employee.getPosition().getId(), employee);
-				companyService.addEmployee(newCompany.getRegistrationNumber(), newEmployee.getPosition().getName(), newEmployee);
-				newEmployee.setSuperior(employeeRepository.findByUsername("sam").get(0));
+				companyService.addEmployee(newCompany.getRegistrationNumber(), newEmployee.getPosition().getName(), employeeRepository.findByUsername("sam").get(0).getId(), newEmployee);
 			}
 			
 			employeeRepository.findByUsername("sam").get(0).setSuperior(null);

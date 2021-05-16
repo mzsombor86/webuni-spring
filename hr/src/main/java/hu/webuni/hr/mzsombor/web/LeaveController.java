@@ -73,8 +73,7 @@ public class LeaveController {
 	public LeaveDto addLeave(@RequestBody @Valid LeaveDto newLeave) {
 		Leave leave;
 		try {
-//			leave = leaveService.addLeave(leaveMapper.dtoToLeave(newLeave), newLeave.getEmployeeId());
-			leave = leaveService.addLeave(leaveMapper.dtoToLeave(newLeave), newLeave.getEmployeeId(), employeeService.findById(newLeave.getEmployeeId()).get().getUsername());
+			leave = leaveService.addLeave(leaveMapper.dtoToLeave(newLeave), newLeave.getEmployeeId());
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
@@ -83,14 +82,13 @@ public class LeaveController {
 
 	@PutMapping("/{id}")
 	public LeaveDto modifyLeave(@PathVariable long id, @RequestBody @Valid LeaveDto modifiedLeave) {
-		modifiedLeave.setEmployeeId(id);
+		//modifiedLeave.setEmployeeId(id);
 		Leave leave;
 		try {
-//			leave = leaveService.modifyLeave(id, leaveMapper.dtoToLeave(modifiedLeave));
 			leave = leaveService.modifyLeave(
 					id, 
 					leaveMapper.dtoToLeave(modifiedLeave), 
-					leaveService.findById(id).get().getEmployee().getUsername());
+					modifiedLeave.getEmployeeId());
 		} catch (InvalidParameterException e) {
 			throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
 		} catch (NoSuchElementException e) {
@@ -103,8 +101,7 @@ public class LeaveController {
 	@DeleteMapping("/{id}")
 	public void deleteLeave(@PathVariable long id) {
 		try {
-//			leaveService.deleteLeave(id);
-			leaveService.deleteLeave(id, leaveService.findById(id).get().getEmployee().getUsername());
+			leaveService.deleteLeave(id, leaveService.findById(id).get().getEmployee().getId());
 		} catch (InvalidParameterException e) {
 			throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
 		} catch (NoSuchElementException e) {
@@ -116,9 +113,7 @@ public class LeaveController {
 	public LeaveDto approveLeave(@PathVariable long id, @RequestParam long approvalId, @RequestParam boolean status) {
 		Leave leave;
 		try {
-//			leave = leaveService.approveLeave(id, approvalId, status);
-			leave = leaveService.approveLeave(id, approvalId, status,
-					employeeService.findById(approvalId).get().getUsername());
+			leave = leaveService.approveLeave(id, approvalId, status);
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		} catch (AccessDeniedException e) {
