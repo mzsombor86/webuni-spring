@@ -26,14 +26,5 @@ public interface LeaveMapper {
 
 	List<Leave> dtosToLeaves(List<LeaveDto> leaveDtos);
 	
-//	@Mapping(source = "company.name", target = "companyName")
-//	@Mapping(source = "position.name", target = "title")
-//	EmployeeDto employeeToDto(Employee employee);
-//	
-//	@Mapping(source = "title", target = "position.name")
-//	@Mapping(source = "companyName", target = "company.name")
-//	@Mapping(target = "leaves", ignore = true)
-//	Employee dtoToEmployee(@Valid EmployeeDto employeeDto);
-	
 
 }

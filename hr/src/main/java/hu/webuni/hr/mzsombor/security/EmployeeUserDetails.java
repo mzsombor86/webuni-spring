@@ -18,6 +18,12 @@ public class EmployeeUserDetails extends User {
 		this.employee = employee;
 		this.employeeId = employee.getId();
 	}
+	
+	public EmployeeUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, Long employeeId) {
+		super(username, password, authorities);
+		this.employee = null;
+		this.employeeId = employeeId;
+	}
 
 	public Employee getEmployee() {
 		return employee;

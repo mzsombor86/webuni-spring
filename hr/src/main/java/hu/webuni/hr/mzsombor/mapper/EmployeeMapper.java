@@ -29,7 +29,6 @@ public interface EmployeeMapper {
 	@Mapping(source = "title", target = "position.name")
 	@Mapping(source = "companyName", target = "company.name")
 	@Mapping(source = "superiorId", target= "superior.id")
-	//@Mapping(target="password", ignore = true)
 	Employee dtoToEmployee(@Valid EmployeeDto employeeDto);
 
 	List<Employee> dtosToEmployees(List<EmployeeDto> employeeDtos);

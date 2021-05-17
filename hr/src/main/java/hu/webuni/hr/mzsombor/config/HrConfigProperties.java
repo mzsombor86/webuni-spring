@@ -10,8 +10,46 @@ public class HrConfigProperties {
 	
 	
 	private Raise raise = new Raise();
+	
+	private Jwt jwt = new Jwt();
 
 	private boolean test;
+	
+	public static class Jwt {
+		
+		private String secret;
+		private String algorythm;
+		private int timeout;
+		private String issuer;
+		
+		public String getSecret() {
+			return secret;
+		}
+		public void setSecret(String secret) {
+			this.secret = secret;
+		}
+		public String getAlgorythm() {
+			return algorythm;
+		}
+		public void setAlgorythm(String algorythm) {
+			this.algorythm = algorythm;
+		}
+		public int getTimeout() {
+			return timeout;
+		}
+		public void setTimeout(int timeout) {
+			this.timeout = timeout;
+		}
+		public String getIssuer() {
+			return issuer;
+		}
+		public void setIssuer(String issuer) {
+			this.issuer = issuer;
+		}
+		
+		
+	}
+	
 	
 	public static class Raise {
 
@@ -77,6 +115,15 @@ public class HrConfigProperties {
 
 	public void setRaise(Raise raise) {
 		this.raise = raise;
+	}
+
+
+	public Jwt getJwt() {
+		return jwt;
+	}
+
+	public void setJwt(Jwt jwt) {
+		this.jwt = jwt;
 	}
 
 	public boolean isTest() {

@@ -77,11 +77,6 @@ public class LeaveService {
 		return leaveRepository.save(leave);
 	}
 	
-	
-//	public Leave addLeave(Leave leave, long employeeId) {
-//		String username = employeeService.findById(employeeId).get().getUsername();
-//		return addLeave(leave, employeeId, username);
-//	}
 
 	@Transactional
 	@PreAuthorize("#approvalId == authentication.principal.employeeId")
@@ -94,11 +89,6 @@ public class LeaveService {
 		leave.setApproveDateTime(LocalDateTime.now());
 		return leave;
 	}
-	
-//	public Leave approveLeave(long id, long approvalId, boolean status) {
-//		String approvalUsername = employeeService.findById(approvalId).get().getUsername();
-//		return approveLeave(id, approvalId, status, approvalUsername);
-//	}
 	
 	
 
@@ -113,11 +103,7 @@ public class LeaveService {
 		leave.setCreateDateTime(LocalDateTime.now());
 		return leave;
 	}
-	
-//	public Leave modifyLeave(long id, Leave newLeave) {
-//		String username = leaveRepository.findById(id).get().getEmployee().getUsername();
-//		return modifyLeave(id,newLeave, username);
-//	}
+
 
 	@Transactional
 	@PreAuthorize("#employeeId == authentication.principal.employeeId")
@@ -129,10 +115,6 @@ public class LeaveService {
 		leaveRepository.deleteById(id);
 	}
 	
-//	public void deleteLeave(long id) {
-//		String username = leaveRepository.findById(id).get().getEmployee().getUsername();
-//		deleteLeave(id, username);
-//	}
 	
 
 }
