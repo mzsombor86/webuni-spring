@@ -18,7 +18,7 @@ public class HrConfigProperties {
 	public static class Jwt {
 		
 		private String secret;
-		private String algorythm;
+		private String algorithm;
 		private int timeout;
 		private String issuer;
 		
@@ -28,11 +28,11 @@ public class HrConfigProperties {
 		public void setSecret(String secret) {
 			this.secret = secret;
 		}
-		public String getAlgorythm() {
-			return algorythm;
+		public String getAlgorithm() {
+			return algorithm;
 		}
-		public void setAlgorythm(String algorythm) {
-			this.algorythm = algorythm;
+		public void setAlgorithm(String algorithm) {
+			this.algorithm = algorithm;
 		}
 		public int getTimeout() {
 			return timeout;

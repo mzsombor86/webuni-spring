@@ -67,6 +67,10 @@ public abstract class EmployeeService {
 	public List<Employee> findByEntryDate(LocalDateTime startDate, LocalDateTime endDate) {
 		return employeeRepository.findByEntryDateBetween(startDate, endDate);
 	}
+	
+	public List<Employee> findBySuperiorId(Long id) {
+		return employeeRepository.findBySuperiorId(id);
+	}
 
 	public List<Employee> findEmployeesByExample(Employee example) {
 		long id = example.getId();
@@ -132,5 +136,7 @@ public abstract class EmployeeService {
 	public void deleteAll() {
 		employeeRepository.deleteAll();
 	}
+
+	
 
 }

@@ -29,4 +29,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 	Page<Employee> findBySalaryGreaterThan(int salary, Pageable pageable);
 
 	List<Employee> findByUsername(String username);
+
+	List<Employee> findBySuperiorId(Long id);
 }

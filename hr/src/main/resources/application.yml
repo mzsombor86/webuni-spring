@@ -1,10 +1,10 @@
 hr:
   test: false
   jwt:
-    secret: mysecret2
-    algorythm: HMAC256
-    timeout: 5
-    issuer: HRApplication
+    secret: kiskutya
+    algorithm: HMAC256
+    timeout: 10000
+    issuer: HR Application Golden Master
   raise:
     def:
       percent: 5
