@@ -16,9 +16,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
 
 import hu.webuni.hr.mzsombor.security.EmployeeUserDetailsService;
 import hu.webuni.hr.mzsombor.security.JwtAuthFilter;
+import hu.webuni.hr.mzsombor.security.StatelessCSRFFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +32,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	JwtAuthFilter jwtAuthFilter;
+	
+	@Autowired
+	StatelessCSRFFilter statelessCSRFFilter;
 	
 	
 	@Override
@@ -66,6 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.anyRequest().permitAll();
 		
 		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(statelessCSRFFilter, CsrfFilter.class);
 		
 	}
 	

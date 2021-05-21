@@ -3,7 +3,7 @@ hr:
   jwt:
     secret: kiskutya
     algorithm: HMAC256
-    timeout: 10000
+    timeout: 100
     issuer: HR Application Golden Master
   raise:
     def:
