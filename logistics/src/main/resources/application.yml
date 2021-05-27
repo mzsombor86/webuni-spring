@@ -1,0 +1,20 @@
+logging:
+  level:
+    org:
+      springframework:
+        security: debug
+spring:
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      time: HH:mm:ss
+      date-time: yyyy-MM-dd HH:mm:ss
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/webuni
+    username: postgres
+    password:
