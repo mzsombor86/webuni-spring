@@ -6,7 +6,13 @@ import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import hu.mzsombor.logistics.dto.AddressDto;
+import hu.mzsombor.logistics.dto.AddressExampleDto;
 import hu.mzsombor.logistics.mapper.AddressMapper;
+import hu.mzsombor.logistics.model.Address;
 import hu.mzsombor.logistics.service.AddressService;
 
 @RestController
@@ -39,6 +47,23 @@ public class AddressController {
 	@GetMapping("/{id}")
 	public AddressDto getAddressById(@PathVariable long id) {
 		return addressMapper.addressToDto(addressService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+	}
+	
+	@PostMapping(value = "/search")
+	public ResponseEntity<List<AddressDto>> findByExample(
+			@RequestBody AddressExampleDto example, 
+			@PageableDefault(direction = Sort.Direction.ASC, page = 0, size = Integer.MAX_VALUE, sort = "id") Pageable pageable
+			){
+		
+		Page<Address> result = addressService.findAddressesByExample(example, pageable);
+		
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("X-Total-Count", 
+			      Long.toString(result.getTotalElements()));
+		
+		return ResponseEntity.ok()
+				.headers(responseHeaders)
+				.body(addressMapper.addressesToDtos(result.getContent()));
 	}
 	
 	@PostMapping
