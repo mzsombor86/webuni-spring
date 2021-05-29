@@ -41,6 +41,11 @@ public class AddressService {
 		if (addressRepository.findById(id).isPresent())
 			addressRepository.deleteById(id);
 	}
+	
+	@Transactional
+	public void deleteAll() {
+		addressRepository.deleteAll();
+	}
 
 	@Transactional
 	public Address ModifyAddress(Address address) {

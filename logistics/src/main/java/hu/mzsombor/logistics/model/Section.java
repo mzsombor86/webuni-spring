@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Section {
@@ -13,11 +14,9 @@ public class Section {
 	@GeneratedValue
 	private long id;
 	
-	@ManyToOne
-	@JoinColumn(name="fromMilestone_id")
+	@OneToOne
 	private Milestone fromMilestone;
-	@ManyToOne
-	@JoinColumn(name="toMilestone_id")
+	@OneToOne
 	private Milestone toMilestone;
 	
 	@ManyToOne

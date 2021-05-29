@@ -22,14 +22,14 @@ public class Address {
 	@NotEmpty
 	private String streetNumber;
 	
-	private double longitude;
-	private double latitude;
+	private Double longitude;
+	private Double latitude;
 	
 	public Address() {
 	}
 
 	public Address(long id, @NotEmpty String countryCode, @NotEmpty String city, @NotEmpty String street,
-			@NotEmpty String zipCode, @NotEmpty String streetNumber, double longitude, double latitude) {
+			@NotEmpty String zipCode, @NotEmpty String streetNumber, Double longitude, Double latitude) {
 		this.id = id;
 		this.countryCode = countryCode;
 		this.city = city;
@@ -88,19 +88,19 @@ public class Address {
 		this.streetNumber = streetNumber;
 	}
 
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
 	
