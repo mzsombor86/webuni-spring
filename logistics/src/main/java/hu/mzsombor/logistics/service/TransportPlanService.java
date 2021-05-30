@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import hu.mzsombor.logistics.config.LogisticsConfigProperties;
+import hu.mzsombor.logistics.model.Milestone;
+import hu.mzsombor.logistics.model.Section;
 import hu.mzsombor.logistics.model.TransportPlan;
 import hu.mzsombor.logistics.repository.TransportPlanRepository;
 
@@ -18,6 +21,12 @@ public class TransportPlanService {
 	
 	@Autowired 
 	SectionService sectionService;
+	
+	@Autowired
+	MilestoneService milestoneService;
+	
+	@Autowired
+	LogisticsConfigProperties config;
 	
 	public List<TransportPlan> getAllTransportPlans() {
 		return transportPlanRepository.findAll();
@@ -41,4 +50,57 @@ public class TransportPlanService {
 		getAllTransportPlans().stream().forEach(t -> t.setSections(null));
 		transportPlanRepository.deleteAll();
 	}
+	
+	@Transactional
+	public long registerDelay(long transportPlanId, long milestoneId, int delayInMinutes) {
+		long newRevenue = adjustRevenue(transportPlanId, delayInMinutes);	
+		setDelayInAffectedMilestones(transportPlanId, milestoneId, delayInMinutes);		
+		return newRevenue;
+	}
+
+	private long adjustRevenue(long transportPlanId, int delayInMinutes) {
+		TransportPlan transportPlan = transportPlanRepository.findById(transportPlanId).get();
+		long currentRevenue = transportPlan.getExpectedRevenue();
+		long adjustedRevenue = currentRevenue;
+		
+		if (delayInMinutes < 30) {
+			adjustedRevenue *= (100-config.getRevenueDropPercentage().getBelow30minutes()) * 0.01;
+		} else if (delayInMinutes < 60) {
+			adjustedRevenue *= (100-config.getRevenueDropPercentage().getBelow60minutes()) * 0.01;
+		} else if (delayInMinutes < 120) {
+			adjustedRevenue *= (100-config.getRevenueDropPercentage().getBelow120minutes()) * 0.01;
+		} else {
+			adjustedRevenue *= (100-config.getRevenueDropPercentage().getAbove120minutes()) * 0.01;
+		}
+		
+		transportPlan.setExpectedRevenue(adjustedRevenue);
+		
+		return adjustedRevenue;
+	}
+	
+	
+	private void setDelayInAffectedMilestones(long transportPlanId, long firstMilestoneId, int delayInMinutes) {
+		Milestone currentMilestone = milestoneService.findById(firstMilestoneId).get();
+		currentMilestone.setPlannedTime(currentMilestone.getPlannedTime().plusMinutes(delayInMinutes));
+		
+		Section section = currentMilestone.getSection();
+		Milestone nextMilestone = null;
+		
+		if (section.getFromMilestone().equals(currentMilestone)) {
+			nextMilestone = section.getToMilestone();
+		} else {
+			int nextSectionNumber = section.getNumber() + 1;
+			Section nextSection = sectionService.findByTransportPlanIdAndNumber(transportPlanId, nextSectionNumber).orElse(null);
+			if (nextSection != null) {	
+				nextMilestone = nextSection.getFromMilestone();
+			}
+		}
+		
+		if (nextMilestone != null) {
+			nextMilestone.setPlannedTime(nextMilestone.getPlannedTime().plusMinutes(delayInMinutes));
+		}
+	}
+
+	
+	
 }

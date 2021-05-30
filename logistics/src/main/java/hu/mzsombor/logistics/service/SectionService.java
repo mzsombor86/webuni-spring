@@ -27,18 +27,26 @@ public class SectionService {
 		return sectionRepository.findById(id);
 	}
 	
+	public Optional<Section> findByTransportPlanIdAndNumber(long id, int number) {
+		return sectionRepository.findByTransportPlanAndNumber(id, number);
+	}
+	
+	public List<Section> findByTransportPlanAndMilestone(long transportPlanId, long milestoneId) {
+		return sectionRepository.findByTransportPlanAndMilestone(transportPlanId, milestoneId);
+	}
+	
+	
 	@Transactional
 	public Section addNewSection(Section section) {
 		Section newSection = sectionRepository.save(section);
-		newSection.getFromMilestone().setStartInSection(newSection);
-		newSection.getToMilestone().setEndInSection(newSection);
+		newSection.getFromMilestone().setSection(newSection);
+		newSection.getToMilestone().setSection(newSection);
 		return newSection;
 	}
 	
 	@Transactional
 	public void deleteAll() {
-		milestoneService.getAllMilestones().stream().forEach(m -> m.setStartInSection(null));
-		milestoneService.getAllMilestones().stream().forEach(m -> m.setEndInSection(null));
+		milestoneService.getAllMilestones().stream().forEach(m -> m.setSection(null));
 		getAllSections().stream().forEach(s -> s.setFromMilestone(null));
 		getAllSections().stream().forEach(s -> s.setToMilestone(null));
 		sectionRepository.deleteAll();

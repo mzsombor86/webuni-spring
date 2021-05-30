@@ -1,3 +1,15 @@
+logistics:
+  test: false
+  jwt:
+    secret: kiskutya
+    algorithm: HMAC256
+    timeout: 10
+    issuer: Logistics Application
+  revenueDropPercentage:
+    below30minutes: 0
+    below60minutes: 10
+    below120minutes: 20
+    above120minutes: 30
 logging:
   level:
     org:

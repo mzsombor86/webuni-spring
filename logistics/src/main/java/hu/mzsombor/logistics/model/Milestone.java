@@ -15,33 +15,24 @@ public class Milestone {
 	@Id
 	@GeneratedValue
 	private long id;
-	
+
 	@ManyToOne
-	@JoinColumn(name="address_id")
+	@JoinColumn(name = "address_id")
 	private Address address;
 	private LocalDateTime plannedTime;
-	
+
 	@OneToOne
-	private Section startInSection;
-	@OneToOne
-	private Section endInSection;
-	
-	
+	private Section section;
+
 	public Milestone() {
 	}
 
-	
-
-	public Milestone(long id, Address address, LocalDateTime plannedTime, Section startInSection,
-			Section endInSection) {
+	public Milestone(long id, Address address, LocalDateTime plannedTime, Section section) {
 		this.id = id;
 		this.address = address;
 		this.plannedTime = plannedTime;
-		this.startInSection = startInSection;
-		this.endInSection = endInSection;
+		this.section = section;
 	}
-
-
 
 	public long getId() {
 		return id;
@@ -67,33 +58,34 @@ public class Milestone {
 		this.plannedTime = plannedTime;
 	}
 
-
-
-	public Section getStartInSection() {
-		return startInSection;
+	public Section getSection() {
+		return section;
 	}
 
-
-
-	public void setStartInSection(Section startInSection) {
-		this.startInSection = startInSection;
+	public void setSection(Section section) {
+		this.section = section;
 	}
 
-
-
-	public Section getEndInSection() {
-		return endInSection;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		return result;
 	}
 
-
-
-	public void setEndInSection(Section endInSection) {
-		this.endInSection = endInSection;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Milestone other = (Milestone) obj;
+		if (id != other.id)
+			return false;
+		return true;
 	}
-	
-	
-	
-	
-	
-	
+
 }
