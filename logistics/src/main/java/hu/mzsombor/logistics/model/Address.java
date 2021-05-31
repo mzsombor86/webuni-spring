@@ -10,7 +10,7 @@ public class Address {
 	@Id
 	@GeneratedValue
 	private long id;
-	
+
 	@NotEmpty
 	private String countryCode;
 	@NotEmpty
@@ -21,10 +21,10 @@ public class Address {
 	private String zipCode;
 	@NotEmpty
 	private String streetNumber;
-	
+
 	private Double longitude;
 	private Double latitude;
-	
+
 	public Address() {
 	}
 
@@ -103,9 +103,5 @@ public class Address {
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-	
-	
-	
-	
-	
+
 }

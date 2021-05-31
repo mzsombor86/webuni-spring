@@ -13,11 +13,11 @@ public class TransportPlan {
 	@Id
 	@GeneratedValue
 	private long id;
-	
+
 	@OneToMany(mappedBy = "transportPlan")
 	private List<Section> sections;
 	private long expectedRevenue;
-	
+
 	public TransportPlan() {
 	}
 
@@ -49,6 +49,6 @@ public class TransportPlan {
 
 	public void setExpectedRevenue(long expectedRevenue) {
 		this.expectedRevenue = expectedRevenue;
-	}	
-	
+	}
+
 }

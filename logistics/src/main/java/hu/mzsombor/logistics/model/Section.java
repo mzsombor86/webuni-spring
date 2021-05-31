@@ -13,19 +13,19 @@ public class Section {
 	@Id
 	@GeneratedValue
 	private long id;
-	
+
 	@OneToOne
 	private Milestone fromMilestone;
 	@OneToOne
 	private Milestone toMilestone;
-	
+
 	@ManyToOne
-	@JoinColumn(name="transportPlan_id")
+	@JoinColumn(name = "transportPlan_id")
 	private TransportPlan transportPlan;
-	
+
 	private int number;
-	
-	public Section() {	
+
+	public Section() {
 	}
 
 	public Section(long id, Milestone fromMilestone, Milestone toMilestone, int number, TransportPlan transportPlan) {
@@ -75,5 +75,5 @@ public class Section {
 	public void setTransportPlan(TransportPlan transportPlan) {
 		this.transportPlan = transportPlan;
 	}
-	
+
 }
