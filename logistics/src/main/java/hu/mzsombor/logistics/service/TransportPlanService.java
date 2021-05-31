@@ -45,6 +45,11 @@ public class TransportPlanService {
 	}
 	
 	@Transactional
+	public TransportPlan updateTransportPlan(TransportPlan transportPlan) {
+		return transportPlanRepository.save(transportPlan);
+	}
+	
+	@Transactional
 	public void deleteAll() {
 		sectionService.getAllSections().stream().forEach(s -> s.setTransportPlan(null));
 		getAllTransportPlans().stream().forEach(t -> t.setSections(null));
