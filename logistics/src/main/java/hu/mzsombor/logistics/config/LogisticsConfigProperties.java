@@ -9,50 +9,7 @@ public class LogisticsConfigProperties {
 
 	private RevenueDropPercentage revenueDropPercentage = new RevenueDropPercentage();
 
-	private Jwt jwt = new Jwt();
-
 	private boolean test;
-
-	public static class Jwt {
-
-		private String secret;
-		private String algorithm;
-		private int timeout;
-		private String issuer;
-
-		public String getSecret() {
-			return secret;
-		}
-
-		public void setSecret(String secret) {
-			this.secret = secret;
-		}
-
-		public String getAlgorithm() {
-			return algorithm;
-		}
-
-		public void setAlgorithm(String algorithm) {
-			this.algorithm = algorithm;
-		}
-
-		public int getTimeout() {
-			return timeout;
-		}
-
-		public void setTimeout(int timeout) {
-			this.timeout = timeout;
-		}
-
-		public String getIssuer() {
-			return issuer;
-		}
-
-		public void setIssuer(String issuer) {
-			this.issuer = issuer;
-		}
-
-	}
 
 	public static class RevenueDropPercentage {
 
@@ -103,14 +60,7 @@ public class LogisticsConfigProperties {
 		this.revenueDropPercentage = revenueDropPercentage;
 	}
 
-	public Jwt getJwt() {
-		return jwt;
-	}
-
-	public void setJwt(Jwt jwt) {
-		this.jwt = jwt;
-	}
-
+	
 	public boolean isTest() {
 		return test;
 	}
