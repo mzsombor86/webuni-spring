@@ -29,13 +29,13 @@ public class TransportPlanController {
 	
 	
 	@PostMapping("/{id}/delay")
-	public long addDelayToATransportPlan(@PathVariable Long id, @RequestBody DelayDto delay) {
+	public void addDelayToATransportPlan(@PathVariable Long id, @RequestBody DelayDto delay) {
 		if (transportPlanService.findById(id).isEmpty() || 
 				milestoneService.findById(delay.getMilestoneId()).isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		if (sectionService.findByTransportPlanAndMilestone(id, delay.getMilestoneId()).isEmpty())
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-		return transportPlanService.registerDelay(id, delay.getMilestoneId(),delay.getDelayInMinutes());
+		transportPlanService.registerDelay(id, delay.getMilestoneId(),delay.getDelayInMinutes());
 	}
 
 }

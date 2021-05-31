@@ -16,12 +16,16 @@ import org.springframework.util.StringUtils;
 import hu.mzsombor.logistics.dto.AddressExampleDto;
 import hu.mzsombor.logistics.model.Address;
 import hu.mzsombor.logistics.repository.AddressRepository;
+import javassist.tools.web.BadHttpRequest;
 
 @Service
 public class AddressService {
 
 	@Autowired
 	AddressRepository addressRepository;
+	
+	@Autowired 
+	MilestoneService milestoneService;
 
 	public List<Address> getAllAddresses() {
 		return addressRepository.findAll();
@@ -37,9 +41,12 @@ public class AddressService {
 	}
 
 	@Transactional
-	public void deleteAddress(long id) {
-		if (addressRepository.findById(id).isPresent())
+	public void deleteAddress(long id) throws BadHttpRequest {
+		if (addressRepository.findById(id).isPresent()) {
+			if (!milestoneService.findByAddressId(id).isEmpty())
+				throw new BadHttpRequest();
 			addressRepository.deleteById(id);
+		}
 	}
 	
 	@Transactional

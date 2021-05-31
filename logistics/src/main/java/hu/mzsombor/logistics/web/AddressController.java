@@ -28,6 +28,7 @@ import hu.mzsombor.logistics.dto.AddressExampleDto;
 import hu.mzsombor.logistics.mapper.AddressMapper;
 import hu.mzsombor.logistics.model.Address;
 import hu.mzsombor.logistics.service.AddressService;
+import javassist.tools.web.BadHttpRequest;
 
 @RestController
 @RequestMapping("/api/addresses")
@@ -76,7 +77,11 @@ public class AddressController {
 	
 	@DeleteMapping("/{id}")
 	public void deleteAddress(@PathVariable long id) {
-		addressService.deleteAddress(id);
+		try {
+			addressService.deleteAddress(id);
+		} catch (BadHttpRequest e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 	@PutMapping("/{id}")

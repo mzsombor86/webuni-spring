@@ -25,7 +25,7 @@ public class LogisticsApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 		if (!config.isTest()) {
-//			initDBService.init();
+			initDBService.init();
 		}
 	}
 

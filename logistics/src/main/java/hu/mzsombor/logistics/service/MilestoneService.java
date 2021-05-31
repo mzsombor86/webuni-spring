@@ -19,6 +19,10 @@ public class MilestoneService {
 	public List<Milestone> getAllMilestones() {
 		return milestoneRepository.findAll();
 	}
+	
+	public List<Milestone> findByAddressId(long id) {
+		return milestoneRepository.findByAddressId(id);
+	}
 
 	public Optional<Milestone> findById(long id) {
 		return milestoneRepository.findById(id);
