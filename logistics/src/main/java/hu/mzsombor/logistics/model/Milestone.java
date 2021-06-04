@@ -24,7 +24,7 @@ public class Milestone {
 	public Milestone() {
 	}
 
-	public Milestone(long id, Address address, LocalDateTime plannedTime, Section section) {
+	public Milestone(long id, Address address, LocalDateTime plannedTime) {
 		this.id = id;
 		this.address = address;
 		this.plannedTime = plannedTime;
