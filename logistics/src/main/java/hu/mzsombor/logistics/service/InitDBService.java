@@ -45,23 +45,23 @@ public class InitDBService {
 				.addNewAddress(new Address(5, "AT", "Salzburg", "Mozart Street", "54321", "5.", null, null));
 
 		Milestone milestone1 = milestoneService
-				.addNewMilestone(new Milestone(1, address1, LocalDateTime.of(2021, 05, 10, 11, 0), null));
+				.addNewMilestone(new Milestone(1, address1, LocalDateTime.of(2021, 05, 10, 11, 0)));
 		Milestone milestone2 = milestoneService
-				.addNewMilestone(new Milestone(2, address2, LocalDateTime.of(2021, 05, 11, 10, 0), null));
+				.addNewMilestone(new Milestone(2, address2, LocalDateTime.of(2021, 05, 11, 10, 0)));
 		Milestone milestone3 = milestoneService
-				.addNewMilestone(new Milestone(3, address2, LocalDateTime.of(2021, 05, 11, 11, 0), null));
+				.addNewMilestone(new Milestone(3, address2, LocalDateTime.of(2021, 05, 11, 11, 0)));
 		Milestone milestone4 = milestoneService
-				.addNewMilestone(new Milestone(4, address3, LocalDateTime.of(2021, 05, 12, 10, 0), null));
+				.addNewMilestone(new Milestone(4, address3, LocalDateTime.of(2021, 05, 12, 10, 0)));
 		Milestone milestone5 = milestoneService
-				.addNewMilestone(new Milestone(5, address3, LocalDateTime.of(2021, 05, 12, 11, 0), null));
+				.addNewMilestone(new Milestone(5, address3, LocalDateTime.of(2021, 05, 12, 11, 0)));
 		Milestone milestone6 = milestoneService
-				.addNewMilestone(new Milestone(6, address4, LocalDateTime.of(2021, 05, 13, 10, 0), null));
+				.addNewMilestone(new Milestone(6, address4, LocalDateTime.of(2021, 05, 13, 10, 0)));
 		Milestone milestone7 = milestoneService
-				.addNewMilestone(new Milestone(7, address4, LocalDateTime.of(2021, 05, 13, 11, 0), null));
+				.addNewMilestone(new Milestone(7, address4, LocalDateTime.of(2021, 05, 13, 11, 0)));
 		Milestone milestone8 = milestoneService
-				.addNewMilestone(new Milestone(8, address5, LocalDateTime.of(2021, 05, 14, 10, 0), null));
+				.addNewMilestone(new Milestone(8, address5, LocalDateTime.of(2021, 05, 14, 10, 0)));
 		Milestone milestone9 = milestoneService
-				.addNewMilestone(new Milestone(9, address5, LocalDateTime.of(2022, 05, 14, 10, 0), null));
+				.addNewMilestone(new Milestone(9, address5, LocalDateTime.of(2022, 05, 14, 10, 0)));
 
 		List<Section> sections = new ArrayList<>();
 
