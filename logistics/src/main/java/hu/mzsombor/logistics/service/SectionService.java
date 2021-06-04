@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import hu.mzsombor.logistics.model.Section;
+import hu.mzsombor.logistics.model.TransportPlan;
 import hu.mzsombor.logistics.repository.SectionRepository;
 
 @Service
@@ -35,22 +36,23 @@ public class SectionService {
 		return sectionRepository.findByTransportPlanAndMilestone(transportPlanId, milestoneId);
 	}
 	
+	public Optional<Section> findByMilestoneId(long milestoneId) {
+		return sectionRepository.findByMilestoneId(milestoneId);
+	}
 	
 	@Transactional
 	public Section addNewSection(Section section) {
 		Section newSection = sectionRepository.save(section);
-		newSection.getFromMilestone().setSection(newSection);
-		newSection.getToMilestone().setSection(newSection);
 		return newSection;
 	}
 	
 	@Transactional
 	public void deleteAll() {
-		milestoneService.getAllMilestones().stream().forEach(m -> m.setSection(null));
 		getAllSections().stream().forEach(s -> s.setFromMilestone(null));
 		getAllSections().stream().forEach(s -> s.setToMilestone(null));
 		sectionRepository.deleteAll();
 	}
+
 	
 	
 }

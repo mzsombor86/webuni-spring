@@ -88,7 +88,7 @@ public class TransportPlanService {
 		Milestone currentMilestone = milestoneService.findById(firstMilestoneId).get();
 		currentMilestone.setPlannedTime(currentMilestone.getPlannedTime().plusMinutes(delayInMinutes));
 		
-		Section section = currentMilestone.getSection();
+		Section section = sectionService.findByMilestoneId(firstMilestoneId).get();
 		Milestone nextMilestone = null;
 		
 		if (section.getFromMilestone().equals(currentMilestone)) {

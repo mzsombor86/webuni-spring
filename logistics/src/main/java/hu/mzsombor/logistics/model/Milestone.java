@@ -7,7 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 
 @Entity
 public class Milestone {
@@ -21,8 +20,6 @@ public class Milestone {
 	private Address address;
 	private LocalDateTime plannedTime;
 
-	@OneToOne
-	private Section section;
 
 	public Milestone() {
 	}
@@ -31,7 +28,6 @@ public class Milestone {
 		this.id = id;
 		this.address = address;
 		this.plannedTime = plannedTime;
-		this.section = section;
 	}
 
 	public long getId() {
@@ -56,14 +52,6 @@ public class Milestone {
 
 	public void setPlannedTime(LocalDateTime plannedTime) {
 		this.plannedTime = plannedTime;
-	}
-
-	public Section getSection() {
-		return section;
-	}
-
-	public void setSection(Section section) {
-		this.section = section;
 	}
 
 	@Override

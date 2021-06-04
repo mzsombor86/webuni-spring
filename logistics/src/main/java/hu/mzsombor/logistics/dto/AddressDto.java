@@ -1,12 +1,14 @@
 package hu.mzsombor.logistics.dto;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 public class AddressDto {
 
 	private Long id;
 	
 	@NotEmpty
+	@Size(min = 2, max = 2)
 	private String countryCode;
 	@NotEmpty
 	private String city;

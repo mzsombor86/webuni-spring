@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Entity
 public class Address {
@@ -12,6 +13,7 @@ public class Address {
 	private long id;
 
 	@NotEmpty
+	@Size(min = 2, max = 2)
 	private String countryCode;
 	@NotEmpty
 	private String city;
