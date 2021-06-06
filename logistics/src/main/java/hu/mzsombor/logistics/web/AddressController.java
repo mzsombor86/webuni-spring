@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,6 +69,7 @@ public class AddressController {
 	}
 	
 	@PostMapping
+	@PreAuthorize("hasAuthority('AddressManager')")
 	public AddressDto addNewAddress(@RequestBody @Valid AddressDto addressDto) {
 		if (addressDto.getId() != null && addressDto.getId() != 0L)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -76,6 +78,7 @@ public class AddressController {
 	}
 	
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('AddressManager')")
 	public void deleteAddress(@PathVariable long id) {
 		try {
 			addressService.deleteAddress(id);
@@ -85,6 +88,7 @@ public class AddressController {
 	}
 	
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('AddressManager')")
 	public AddressDto modifyAddress(@RequestBody @Valid AddressDto addressDto, @PathVariable long id) {
 		if (addressDto.getId() != null && addressDto.getId() != 0 && addressDto.getId() != id)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
